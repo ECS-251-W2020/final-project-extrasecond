@@ -13,7 +13,6 @@ SOURCES = $(wildcard **/*.rs) $(wildcard **/*.S) $(wildcard **/*.ld)
 
 XRUSTC_CMD = cargo xrustc     \
 	--target=$(TARGET)    \
-	--features bsp_rpi3 \
 	--release
 
 CARGO_OUTPUT = target/$(TARGET)/release/ritos

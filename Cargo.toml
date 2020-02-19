@@ -7,9 +7,5 @@ edition = "2018"
 [package.metadata.cargo-xbuild]
 sysroot_path = "../xbuild_sysroot"
 
-[features]
-default = ["cortex-a"]
-bsp_rpi3 = []
-
 [dependencies]
-cortex-a = { version = "2.9.x", optional = true }
+cortex-a = { version = "2.9.x" }
