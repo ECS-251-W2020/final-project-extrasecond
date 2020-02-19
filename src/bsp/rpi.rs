@@ -1,6 +1,9 @@
 use crate::interface;
 use core::fmt;
 
+pub const BOOT_CORE_ID: u64 = 0;
+pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
+
 struct QEMUOutput;
 
 impl interface::console::Write for QEMUOutput {

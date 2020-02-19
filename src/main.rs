@@ -1,5 +1,3 @@
-#![feature(asm)]
-#![feature(global_asm)]
 #![feature(format_args_nl)]
 #![no_main]
 #![no_std]
