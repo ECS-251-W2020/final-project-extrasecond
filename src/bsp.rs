@@ -1,5 +1,6 @@
-#[cfg(feature = "bsp_rpi3")]
-mod aarch64;
 
 #[cfg(feature = "bsp_rpi3")]
-pub use aarch64::*;
+mod rpi;
+
+#[cfg(feature = "bsp_rpi3")]
+pub use rpi::*;

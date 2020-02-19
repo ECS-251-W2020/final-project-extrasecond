@@ -4,7 +4,7 @@ SECTIONS
 
     .text : 
     {
-        *(.text.boot) *(.text*)
+        *(.text._start) *(.text*)
     }
 
     .rodata : 

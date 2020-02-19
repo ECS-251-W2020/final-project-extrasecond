@@ -1,5 +1,6 @@
 #![feature(asm)]
 #![feature(global_asm)]
+#![feature(format_args_nl)]
 #![no_main]
 #![no_std]
 
@@ -9,6 +10,10 @@ mod arch;
 mod runtime_init;
 mod memory;
 mod panic;
+mod print;
+mod bsp;
+mod interface;
+
 
 /// Early init code.
 ///
@@ -16,5 +21,6 @@ mod panic;
 ///
 /// - Only a single core must be active and running this function.
 unsafe fn kernel_init() -> ! {
+    println!("Hello from Rust!");
     panic!();
 }
