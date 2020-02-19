@@ -1,0 +1,14 @@
+[package]
+name = "ritos"
+version = "0.0.1"
+authors = [""]
+edition = "2018"
+
+[package.metadata.cargo-xbuild]
+sysroot_path = "../xbuild_sysroot"
+
+[features]
+default = []
+bsp_rpi3 = []
+
+[dependencies]
