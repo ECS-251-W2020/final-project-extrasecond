@@ -14,11 +14,6 @@ mod bsp;
 mod interface;
 
 
-/// Early init code.
-///
-/// # Safety
-///
-/// - Only a single core must be active and running this function.
 unsafe fn kernel_init() -> ! {
     println!("Hello from Rust!");
     panic!("Kernel panicked");
