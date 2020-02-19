@@ -39,10 +39,13 @@ $(OUTPUT): $(CARGO_OUTPUT)
 	cp $< .
 	$(OBJCOPY_CMD) $< $(OUTPUT)
 
-qemu: all
+docker: all
 	@$(DOCKER_CMD) $(DOCKER_ARG_DIR_TUT) $(DOCKER_IMAGE) \
 		$(DOCKER_EXEC_QEMU) $(QEMU_RELEASE_ARGS)     \
 		-kernel $(OUTPUT)
+
+qemu: all
+	$(DOCKER_EXEC_QEMU) $(QEMU_RELEASE_ARGS) -kernel $(OUTPUT)
 
 clean:
 	rm -rf target
