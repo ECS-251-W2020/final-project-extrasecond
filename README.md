@@ -4,7 +4,7 @@ For proposal please refer to [here](https://github.com/ExtraSecond/proposal).
 
 Install suitable rust toolchain:
 
-`bash
+```bash
 curl https://sh.rustup.rs -sSf             \
     |                                      \
     sh -s --                               \
@@ -13,4 +13,4 @@ curl https://sh.rustup.rs -sSf             \
 
 source $HOME/.cargo/env
 cargo install cargo-xbuild cargo-binutils
-`
+```
