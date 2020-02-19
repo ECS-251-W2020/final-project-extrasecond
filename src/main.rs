@@ -10,11 +10,6 @@ mod runtime_init;
 mod memory;
 mod panic;
 
-/// Early init code.
-///
-/// # Safety
-///
-/// - Only a single core must be active and running this function.
 unsafe fn kernel_init() -> ! {
     panic!();
 }
