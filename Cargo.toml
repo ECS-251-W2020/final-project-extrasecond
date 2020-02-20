@@ -8,4 +8,5 @@ edition = "2018"
 sysroot_path = ".xbuild_sysroot"
 
 [dependencies]
-cortex-a = { version = "2.9.x" }
+cortex-a = "2.9.x"
+spin = "0.5.2"

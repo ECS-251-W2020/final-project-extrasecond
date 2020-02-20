@@ -1,6 +1,9 @@
 pub mod console {
-    pub use core::fmt::Write;
+    use core::fmt;
 
+    pub trait Write {
+        fn write_fmt(&self, args: fmt::Arguments) -> fmt::Result;
+    }
 }
 
 pub mod sync {

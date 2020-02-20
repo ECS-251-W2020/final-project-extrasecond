@@ -1,8 +1,7 @@
 use core::fmt;
 
 pub fn _print(args: fmt::Arguments){
-    use core::fmt::Write;
-    
+    use crate::interface::console::Write;
     crate::bsp::console().write_fmt(args).unwrap();
 }
 
