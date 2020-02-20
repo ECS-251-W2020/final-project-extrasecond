@@ -1,5 +1,5 @@
-use cortex_a::{asm, regs::*};
 use crate::bsp;
+use cortex_a::{asm, regs::*};
 
 #[no_mangle]
 pub unsafe extern "C" fn _start() -> ! {

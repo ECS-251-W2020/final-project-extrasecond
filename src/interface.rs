@@ -11,6 +11,7 @@ pub mod sync {
         type Data;
 
         fn lock<R, F>(&mut self, f: F) -> R
-        where F: FnOnce(&mut Self::Data) -> R ;
+        where
+            F: FnOnce(&mut Self::Data) -> R;
     }
 }

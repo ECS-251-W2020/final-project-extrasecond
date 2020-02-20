@@ -5,7 +5,7 @@ use core::fmt::Write;
 pub const BOOT_CORE_ID: u64 = 0;
 pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
 
-struct QEMUOutputInner{
+struct QEMUOutputInner {
     chars_written: usize,
 }
 
@@ -16,8 +16,8 @@ impl QEMUOutputInner {
 }
 
 impl core::fmt::Write for QEMUOutputInner {
-    fn write_str(&mut self, s: &str) -> fmt::Result{
-        for c in s.chars(){
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        for c in s.chars() {
             unsafe {
                 core::ptr::write_volatile(0x3F20_1000 as *mut u8, c as u8);
             }
@@ -32,9 +32,11 @@ use spin::Mutex;
 struct QEMUOutput {
     inner: Mutex<QEMUOutputInner>,
 }
-impl QEMUOutput{
+impl QEMUOutput {
     const fn new() -> Self {
-        QEMUOutput { inner: Mutex::new(QEMUOutputInner::new())}
+        QEMUOutput {
+            inner: Mutex::new(QEMUOutputInner::new()),
+        }
     }
 }
 

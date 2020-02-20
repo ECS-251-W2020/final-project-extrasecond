@@ -11,4 +11,3 @@ where
         ptr = ptr.offset(1);
     }
 }
-
