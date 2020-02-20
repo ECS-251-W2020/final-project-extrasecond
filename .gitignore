@@ -3,3 +3,4 @@ ritos
 kernel8.img
 target
 Cargo.lock
+.xbuild_sysroot/
