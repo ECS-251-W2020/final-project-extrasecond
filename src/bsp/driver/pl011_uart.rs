@@ -1,8 +1,8 @@
-use crate::{interface, arch::Lock};
+use crate::{arch::Lock, interface};
+use asm::nop;
 use core::{fmt, ops};
 use cortex_a::asm;
 use register::{mmio::*, register_bitfields, register_structs};
-use asm::nop;
 
 register_bitfields! {
     u32,
