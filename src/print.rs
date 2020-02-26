@@ -11,7 +11,7 @@ pub fn _print(args: fmt::Arguments) {
 macro_rules! println {
     () => ($crate::print!("\n"));
     ($($arg:tt)*) => ({
-        $crate::print::_print(format_args!($($arg)*));
+        $crate::print::_print(format_args_nl!($($arg)*));
     })
 }
 #[macro_export]
