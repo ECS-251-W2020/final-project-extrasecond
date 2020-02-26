@@ -9,4 +9,5 @@ sysroot_path = ".xbuild_sysroot"
 
 [dependencies]
 cortex-a = "2.9.x"
+register = "0.5.x"
 spin = "0.5.2"
