@@ -113,6 +113,9 @@ impl PL011UartInner {
     }
 
     fn write_char(&mut self, c: char) {
+        if c == '\n' {
+            self.write_char('\r');
+        }
         while self.FR.matches_all(FR::TXFF::SET) {
             nop();
         }
