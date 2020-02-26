@@ -1,4 +1,4 @@
-use crate::{arch, interface};
+use crate::{arch, arch::Lock, interface};
 use core::ops;
 use register::{mmio::ReadWrite, register_bitfields, register_structs};
 
@@ -71,20 +71,39 @@ impl GPIOInner {
     }
 }
 
-use spin::Mutex;
+// use spin::Mutex;
+use interface::sync::Mutex;
 
 pub struct GPIO {
-    inner: Mutex<GPIOInner>,
+    inner: Lock<GPIOInner>,
 }
 
 impl GPIO {
     pub const unsafe fn new(base_addr: usize) -> GPIO {
         GPIO {
-            inner: Mutex::new(GPIOInner::new(base_addr)),
+            inner: Lock::new(GPIOInner::new(base_addr)),
         }
     }
 
     pub fn map_pl011_uart(&self) {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            inner
+                .GPFSEL1
+                .modify(GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0);
+
+            inner.GPPUD.set(0);
+            arch::spin_for_cycles(150);
+
+            inner
+                .GPPUDCLK0
+                .write(GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock);
+            arch::spin_for_cycles(150);
+
+            inner.GPPUDCLK0.set(0);
+        })
+
+        /*
         let r = self.inner.lock();
 
         r.GPFSEL1
@@ -96,6 +115,7 @@ impl GPIO {
             .write(GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock);
         arch::spin_for_cycles(150);
         r.GPPUDCLK0.set(0);
+         */
     }
 }
 

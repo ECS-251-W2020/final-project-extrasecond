@@ -37,3 +37,11 @@ pub mod driver {
         }
     }
 }
+
+pub mod sync {
+    pub trait Mutex {
+        type Data;
+
+        fn lock<R>(&mut self, f: impl FnOnce(&mut Self::Data) -> R) -> R;
+    }
+}

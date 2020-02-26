@@ -1,8 +1,8 @@
-use crate::interface;
+use crate::{interface, arch::Lock};
 use core::{fmt, ops};
 use cortex_a::asm;
 use register::{mmio::*, register_bitfields, register_structs};
-use spin::Mutex;
+use asm::nop;
 
 register_bitfields! {
     u32,
@@ -74,9 +74,6 @@ register_structs! {
     }
 }
 
-use asm::nop;
-use core::fmt::Write;
-
 pub struct PL011UartInner {
     base_addr: usize,
     chars_written: usize,
@@ -135,14 +132,19 @@ impl fmt::Write for PL011UartInner {
     }
 }
 
+use interface::sync::Mutex;
+// use spin::Mutex;
+
 pub struct PL011Uart {
-    inner: Mutex<PL011UartInner>,
+    inner: Lock<PL011UartInner>,
+    // inner: Mutex<PL011UartInner>,
 }
 
 impl PL011Uart {
     pub const unsafe fn new(base_addr: usize) -> PL011Uart {
         PL011Uart {
-            inner: Mutex::new(PL011UartInner::new(base_addr)),
+            inner: Lock::new(PL011UartInner::new(base_addr)),
+            // inner: Mutex::new(PL011UartInner::new(base_addr)),
         }
     }
 }
@@ -153,7 +155,9 @@ impl interface::driver::DeviceDriver for PL011Uart {
     }
 
     fn init(&self) -> interface::driver::Result {
-        self.inner.lock().init();
+        let mut r = &self.inner;
+        r.lock(|inner| inner.init());
+        // self.inner.lock().init();
 
         Ok(())
     }
@@ -161,16 +165,38 @@ impl interface::driver::DeviceDriver for PL011Uart {
 
 impl interface::console::Write for PL011Uart {
     fn write_char(&self, c: char) {
-        self.inner.lock().write_char(c);
+        let mut r = &self.inner;
+        r.lock(|inner| inner.write_char(c));
+        // self.inner.lock().write_char(c);
     }
 
     fn write_fmt(&self, args: fmt::Arguments) -> fmt::Result {
-        self.inner.lock().write_fmt(args)
+        let mut r = &self.inner;
+        r.lock(|inner| fmt::Write::write_fmt(inner, args))
+        // self.inner.lock().write_fmt(args)
     }
 }
 
 impl interface::console::Read for PL011Uart {
     fn read_char(&self) -> char {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            while inner.FR.matches_all(FR::RXFE::SET) {
+                nop();
+            }
+
+            let mut ret = inner.DR.get() as u8 as char;
+
+            if ret == '\r' {
+                ret = '\n'
+            }
+
+            inner.chars_read += 1;
+
+            ret
+        })
+
+        /*
         let mut r = self.inner.lock();
         while r.FR.matches_all(FR::RXFE::SET) {
             nop();
@@ -184,16 +210,21 @@ impl interface::console::Read for PL011Uart {
         r.chars_read += 1;
 
         ret
+         */
     }
 }
 
 impl interface::console::Statistics for PL011Uart {
     fn chars_written(&self) -> usize {
-        self.inner.lock().chars_written
+        let mut r = &self.inner;
+        r.lock(|inner| inner.chars_written)
+        // self.inner.lock().chars_written
     }
 
     fn chars_read(&self) -> usize {
-        self.inner.lock().chars_read
+        let mut r = &self.inner;
+        r.lock(|inner| inner.chars_read)
+        // self.inner.lock().chars_read
     }
 }
 
