@@ -2,9 +2,7 @@ use core::{fmt, panic::PanicInfo};
 
 fn _panic_print(args: fmt::Arguments) {
     use fmt::Write;
-    unsafe {
-        crate::bsp::panic_console_out().write_fmt(args).unwrap()
-    };
+    unsafe { crate::bsp::panic_console_out().write_fmt(args).unwrap() };
 }
 
 #[macro_export]

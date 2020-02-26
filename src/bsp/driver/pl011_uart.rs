@@ -1,8 +1,8 @@
 use crate::interface;
 use core::{fmt, ops};
+use cortex_a::asm;
 use register::{mmio::*, register_bitfields, register_structs};
 use spin::Mutex;
-use cortex_a::asm;
 
 register_bitfields! {
     u32,
@@ -87,9 +87,7 @@ impl ops::Deref for PL011UartInner {
     type Target = RegisterBlock;
 
     fn deref(&self) -> &Self::Target {
-        unsafe {
-            &*self.ptr()
-        }
+        unsafe { &*self.ptr() }
     }
 }
 
@@ -107,8 +105,10 @@ impl PL011UartInner {
         self.ICR.write(ICR::ALL::CLEAR);
         self.IBRD.write(IBRD::IBRD.val(13));
         self.FBRD.write(FBRD::FBRD.val(2));
-        self.LCRH.write(LCRH::WLEN::EightBit + LCRH::FEN::FifosEnabled);
-        self.CR.write(CR::UARTEN::Enabled + CR::TXE::Enabled + CR::RXE::Enabled);
+        self.LCRH
+            .write(LCRH::WLEN::EightBit + LCRH::FEN::FifosEnabled);
+        self.CR
+            .write(CR::UARTEN::Enabled + CR::TXE::Enabled + CR::RXE::Enabled);
     }
 
     fn ptr(&self) -> *const RegisterBlock {
@@ -168,8 +168,6 @@ impl interface::console::Write for PL011Uart {
         self.inner.lock().write_fmt(args)
     }
 }
-
-
 
 impl interface::console::Read for PL011Uart {
     fn read_char(&self) -> char {

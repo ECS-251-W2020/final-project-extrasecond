@@ -86,12 +86,14 @@ impl GPIO {
 
     pub fn map_pl011_uart(&self) {
         let r = self.inner.lock();
-        
-        r.GPFSEL1.modify(GPFSEL1::FSEL14::AltFunc0+ GPFSEL1::FSEL15::AltFunc0);
+
+        r.GPFSEL1
+            .modify(GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0);
         r.GPPUD.set(0);
         arch::spin_for_cycles(150);
 
-        r.GPPUDCLK0.write(GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock);
+        r.GPPUDCLK0
+            .write(GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock);
         arch::spin_for_cycles(150);
         r.GPPUDCLK0.set(0);
     }
