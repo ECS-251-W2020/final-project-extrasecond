@@ -23,31 +23,7 @@ unsafe fn kernel_init() -> ! {
     bsp::post_driver_init();
     kernel_main()
 }
-/*
-fn kernel_main() -> ! {
-    use interface::console::All;
-    loop {
-        if bsp::console().read_char() == '\n' {
-            break;
-        }
-    }
 
-    println!("[Info] Board name: {}", bsp::board_name());
-
-    println!("[Info] Drivers loaded:");
-    for (i, driver) in bsp::device_drivers().iter().enumerate() {
-        println!("    {}. {}", i + 1, driver.compatible());
-    }
-
-    println!("[Info] {} chars written", bsp::console().chars_written());
-    println!("[Info] Echoing input");
-
-    loop {
-        let c = bsp::console().read_char();
-        bsp::console().write_char(c);
-    }
-}
-*/
 fn kernel_main() -> ! {
     use core::time::Duration;
     use interface::time::Timer;
