@@ -39,3 +39,6 @@ init_uart_clock=48000000
 ```bash
 sudo screen /dev/ttyUSB0 230400
 ```
+## TODO
+
+`make` before `demo_payload_rpi3.img` become useful. Then you can `make chainboot`

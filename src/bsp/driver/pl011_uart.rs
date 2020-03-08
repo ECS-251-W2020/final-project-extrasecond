@@ -173,25 +173,34 @@ impl interface::console::Write for PL011Uart {
         let r = &mut self.inner;
         r.lock(|inner| fmt::Write::write_fmt(inner, args))
     }
+
+    fn flush(&mut self) {
+        let r = &mut self.inner;
+        // Spin until TX FIFO empty is set.
+        r.lock(|inner| {
+            while !inner.FR.matches_all(FR::TXFE::SET) {
+                nop();
+            }
+        });
+    }
 }
 
 impl interface::console::Read for PL011Uart {
     fn read_char(&mut self) -> char {
         let r = &mut self.inner;
         r.lock(|inner| {
-            while inner.FR.matches_all(FR::RXFE::SET) {
-                nop();
+            // Read one character.
+            inner.DR.get() as u8 as char
+        })
+    }
+
+    fn clear(&mut self) {
+        let r = &mut self.inner;
+        r.lock(|inner| {
+            // Read from the RX FIFO until it is indicating empty.
+            while !inner.FR.matches_all(FR::RXFE::SET) {
+                inner.DR.get();
             }
-
-            let mut ret = inner.DR.get() as u8 as char;
-
-            if ret == '\r' {
-                ret = '\n'
-            }
-
-            inner.chars_read += 1;
-
-            ret
         })
     }
 }

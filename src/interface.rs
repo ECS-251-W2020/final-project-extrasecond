@@ -5,12 +5,17 @@ pub mod console {
         fn write_fmt(&mut self, args: fmt::Arguments) -> fmt::Result;
 
         fn write_char(&mut self, c: char);
+
+        /// Block execution until the last character has been physically put on the TX wire
+        /// (draining TX buffers/FIFOs, if any).
+        fn flush(&mut self);
     }
 
     pub trait Read {
         fn read_char(&mut self) -> char {
             ' '
         }
+        fn clear(&mut self);
     }
 
     pub trait Statistics {

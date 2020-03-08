@@ -1,13 +1,18 @@
+ifndef DEV_SERIAL
+	DEV_SERIAL = /dev/ttyUSB0
+endif
+
 TARGET            	= aarch64-unknown-none-softfloat
 OUTPUT            	= kernel8.img
 QEMU_BINARY       	= qemu-system-aarch64
 QEMU_MACHINE_TYPE 	= raspi3
 QEMU_RELEASE_ARGS 	= -serial stdio -display none
-LINKER_FILE       	= src/bsp/rpi/link.ld
-RUSTC_MISC_ARGS   	= -C target-cpu=cortex-a53
+LINKER_FILE       = src/bsp/rpi/link.ld
+RUSTC_MISC_ARGS   = -C target-cpu=cortex-a53 -C relocation-model=pic
+CHAINBOOT_DEMO_PAYLOAD = demo_payload_rpi3.img
 
-RUSTFLAGS          	= -C link-arg=-T$(LINKER_FILE) $(RUSTC_MISC_ARGS)
-RUSTFLAGS_PEDANTIC 	= $(RUSTFLAGS) -D warnings
+RUSTFLAGS          = -C link-arg=-T$(LINKER_FILE) $(RUSTC_MISC_ARGS)
+RUSTFLAGS_PEDANTIC = $(RUSTFLAGS) -D warnings
 
 SOURCES = $(wildcard **/*.rs) $(wildcard **/*.S) $(wildcard **/*.ld)
 
@@ -21,13 +26,16 @@ OBJCOPY_CMD = cargo objcopy \
 	--                  \
 	--strip-all         \
 	-O binary
-
+	
 DOCKER_IMAGE         = rustembedded/osdev-utils
 DOCKER_CMD           = docker run -it --rm
 DOCKER_ARG_DIR_TUT   = -v $(shell pwd):/work -w /work
+DOCKER_ARG_DIR_UTILS = -v $(shell pwd)/utils:/utils
+DOCKER_ARG_TTY       = --privileged -v /dev:/dev
 DOCKER_EXEC_QEMU     = $(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE)
+DOCKER_EXEC_MINIPUSH = ruby /utils/minipush.rb
 
-.PHONY: all doc qemu clippy clean readelf objdump nm
+.PHONY: all doc qemu qemuasm chainboot clippy clean
 
 all: clean $(OUTPUT)
 
@@ -38,13 +46,26 @@ $(OUTPUT): $(CARGO_OUTPUT)
 	cp $< .
 	$(OBJCOPY_CMD) $< $(OUTPUT)
 
+qemu: all
+	$(DOCKER_EXEC_QEMU) $(QEMU_RELEASE_ARGS) -kernel $(OUTPUT)
+
 docker: all
 	@$(DOCKER_CMD) $(DOCKER_ARG_DIR_TUT) $(DOCKER_IMAGE) \
 		$(DOCKER_EXEC_QEMU) $(QEMU_RELEASE_ARGS)     \
 		-kernel $(OUTPUT)
 
-qemu: all
-	$(DOCKER_EXEC_QEMU) $(QEMU_RELEASE_ARGS) -kernel $(OUTPUT)
+qemuasm: all
+	@$(DOCKER_CMD) $(DOCKER_ARG_DIR_TUT) $(DOCKER_IMAGE) \
+		$(DOCKER_EXEC_QEMU) $(QEMU_RELEASE_ARGS)     \
+		-kernel $(OUTPUT) -d in_asm
+
+chainboot:
+	@$(DOCKER_CMD) $(DOCKER_ARG_DIR_TUT) $(DOCKER_ARG_DIR_UTILS) $(DOCKER_ARG_TTY) \
+		$(DOCKER_IMAGE) $(DOCKER_EXEC_MINIPUSH) $(DEV_SERIAL)                  \
+		$(CHAINBOOT_DEMO_PAYLOAD) -kernel $(OUTPUT) -d in_asm
+
+clippy:
+	RUSTFLAGS="$(RUSTFLAGS_PEDANTIC)" cargo xclippy --target=$(TARGET) --features bsp_$(BSP)
 
 clean:
 	rm -rf target
