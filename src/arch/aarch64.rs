@@ -1,4 +1,6 @@
-use super::time;
+pub mod sync;
+mod time;
+
 use crate::{bsp, interface};
 use cortex_a::{asm, regs::*};
 
