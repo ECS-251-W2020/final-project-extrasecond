@@ -17,18 +17,6 @@ register_bitfields! {
             Output = 0b001,
             AltFunc0 = 0b100
         ]
-    ],
-
-    GPPUDCLK0 [
-        PUDCLK15 OFFSET(15) NUMBITS(1) [
-            NoEffect = 0,
-            AssertClock = 1
-        ],
-
-        PUDCLK14 OFFSET(14) NUMBITS(1) [
-            NoEffect = 0,
-            AssertClock = 1
-        ]
     ]
 }
 
@@ -42,8 +30,17 @@ register_structs! {
         (0x10 => GPFSEL4: ReadWrite<u32>),
         (0x14 => GPFSEL5: ReadWrite<u32>),
         (0x18 => _reserved1),
+        (0x1c => GPSET0: ReadWrite<u32>),
+        (0x20 => GPSET1: ReadWrite<u32>),
+        (0x24 => _reserved2),
+        (0x28 => GPCLR0: ReadWrite<u32>),
+        (0x2c => GPCLR1: ReadWrite<u32>),
+        (0x30 => _reserved3),
+        (0x34 => GPLEV0: ReadWrite<u32>),
+        (0x38 => GPLEV1: ReadWrite<u32>),
+        (0x3c => _reserved4),
         (0x94 => GPPUD: ReadWrite<u32>),
-        (0x98 => GPPUDCLK0: ReadWrite<u32, GPPUDCLK0::Register>),
+        (0x98 => GPPUDCLK0: ReadWrite<u32>),
         (0x9C => GPPUDCLK1: ReadWrite<u32>),
         (0xA0 => @END),
     }
@@ -85,6 +82,34 @@ impl GPIO {
         }
     }
 
+    pub fn output(&self, pin: u32, value: u32) {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            if value == 0 {
+                let modified = (inner.GPSET0.get() as u32) | (1 << pin);
+                inner.GPSET0.set(modified);
+            } else {
+                let modified = (inner.GPCLR0.get() as u32) | (1 << pin);
+                inner.GPCLR0.set(modified);
+            }
+        })
+    }
+
+    pub fn pullupdn(&self, pin: u32, op: u32) {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            inner.GPPUD.set(op);
+            arch::spin_for_cycles(150);
+
+            let modified = (inner.GPPUDCLK0.get() as u32) | (1 << pin);
+            inner.GPPUDCLK0.set(modified);
+            arch::spin_for_cycles(150);
+
+            inner.GPPUD.set(0);
+            inner.GPPUDCLK0.set(0);
+        })
+    }
+
     pub fn map_pl011_uart(&self) {
         let mut r = &self.inner;
         r.lock(|inner| {
@@ -94,28 +119,14 @@ impl GPIO {
 
             inner.GPPUD.set(0);
             arch::spin_for_cycles(150);
+            
+            let modified = (inner.GPPUDCLK0.get() as u32) | (1 << 14) | (1 << 15);
+            inner.GPPUDCLK0.set(modified);
 
-            inner
-                .GPPUDCLK0
-                .write(GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock);
             arch::spin_for_cycles(150);
 
             inner.GPPUDCLK0.set(0);
         })
-
-        /*
-        let r = self.inner.lock();
-
-        r.GPFSEL1
-            .modify(GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0);
-        r.GPPUD.set(0);
-        arch::spin_for_cycles(150);
-
-        r.GPPUDCLK0
-            .write(GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock);
-        arch::spin_for_cycles(150);
-        r.GPPUDCLK0.set(0);
-         */
     }
 }
 
