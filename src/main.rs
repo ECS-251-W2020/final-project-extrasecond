@@ -3,8 +3,7 @@
 #![no_std]
 #![feature(panic_info_message)]
 #![feature(trait_alias)]
-#![feature(asm)]
-#![feature(global_asm)]
+#![feature(exclusive_range_pattern)]
 
 mod arch;
 mod bsp;
@@ -25,7 +24,9 @@ unsafe fn kernel_init() -> ! {
 }
 /*
 fn kernel_main() -> ! {
-    use interface::console::All;
+    use interface::console::ConsoleAll;
+    use interface::gpio::GPIOAll;
+
     loop {
         if bsp::console().read_char() == '\n' {
             break;
@@ -42,6 +43,13 @@ fn kernel_main() -> ! {
     println!("[Info] {} chars written", bsp::console().chars_written());
     println!("[Info] Echoing input");
 
+    bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
+    bsp::gpio().output(0, 1);
+    bsp::gpio().input(1);
+
+    bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
+    bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
+
     loop {
         let c = bsp::console().read_char();
         bsp::console().write_char(c);
@@ -51,6 +59,7 @@ fn kernel_main() -> ! {
 fn kernel_main() -> ! {
     use core::time::Duration;
     use interface::time::Timer;
+    use interface::gpio::GPIOAll;
 
     info!("Booting on: {}", bsp::board_name());
     info!(
@@ -65,6 +74,13 @@ fn kernel_main() -> ! {
 
     // Test a failing timer case.
     arch::timer().spin_for(Duration::from_nanos(1));
+
+    bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
+    bsp::gpio().output(0, 1);
+    bsp::gpio().input(1);
+
+    bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
+    bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
 
     loop {
         info!("Spinning for 1 second");
