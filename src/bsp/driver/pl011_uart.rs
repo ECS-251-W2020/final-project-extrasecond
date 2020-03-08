@@ -198,22 +198,6 @@ impl interface::console::Read for PL011Uart {
 
             ret
         })
-
-        /*
-        let mut r = self.inner.lock();
-        while r.FR.matches_all(FR::RXFE::SET) {
-            nop();
-        }
-
-        let mut ret = r.DR.get() as u8 as char;
-        if ret == '\r' {
-            ret = '\n'
-        }
-
-        r.chars_read += 1;
-
-        ret
-         */
     }
 }
 

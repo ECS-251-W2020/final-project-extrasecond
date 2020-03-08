@@ -3,6 +3,7 @@
 #![no_std]
 #![feature(panic_info_message)]
 #![feature(trait_alias)]
+#![feature(exclusive_range_pattern)]
 
 mod arch;
 mod bsp;
@@ -24,7 +25,9 @@ unsafe fn kernel_init() -> ! {
 }
 
 fn kernel_main() -> ! {
-    use interface::console::All;
+    use interface::console::ConsoleAll;
+    use interface::gpio::GPIOAll;
+
     loop {
         if bsp::console().read_char() == '\n' {
             break;
@@ -40,6 +43,13 @@ fn kernel_main() -> ! {
 
     println!("[Info] {} chars written", bsp::console().chars_written());
     println!("[Info] Echoing input");
+
+    bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
+    bsp::gpio().output(0, 1);
+    bsp::gpio().input(1);
+
+    bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
+    bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
 
     loop {
         let c = bsp::console().read_char();

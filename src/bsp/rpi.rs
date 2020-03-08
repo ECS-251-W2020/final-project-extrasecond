@@ -16,8 +16,12 @@ pub fn board_name() -> &'static str {
     "Raspberry Pi 3"
 }
 
-pub fn console() -> &'static impl interface::console::All {
+pub fn console() -> &'static impl interface::console::ConsoleAll {
     &PL011_UART
+}
+
+pub fn gpio() -> &'static impl interface::gpio::GPIOAll {
+    &GPIO
 }
 
 pub unsafe fn panic_console_out() -> impl fmt::Write {
@@ -31,7 +35,6 @@ pub fn device_drivers() -> [&'static dyn interface::driver::DeviceDriver; 2] {
 }
 
 pub fn post_driver_init() {
-    GPIO.output(0, 1);
-    GPIO.pullupdn(0, 1);
+
     GPIO.map_pl011_uart();
 }

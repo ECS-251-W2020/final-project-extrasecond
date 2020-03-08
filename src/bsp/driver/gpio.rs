@@ -82,34 +82,6 @@ impl GPIO {
         }
     }
 
-    pub fn output(&self, pin: u32, value: u32) {
-        let mut r = &self.inner;
-        r.lock(|inner| {
-            if value == 0 {
-                let modified = (inner.GPSET0.get() as u32) | (1 << pin);
-                inner.GPSET0.set(modified);
-            } else {
-                let modified = (inner.GPCLR0.get() as u32) | (1 << pin);
-                inner.GPCLR0.set(modified);
-            }
-        })
-    }
-
-    pub fn pullupdn(&self, pin: u32, op: u32) {
-        let mut r = &self.inner;
-        r.lock(|inner| {
-            inner.GPPUD.set(op);
-            arch::spin_for_cycles(150);
-
-            let modified = (inner.GPPUDCLK0.get() as u32) | (1 << pin);
-            inner.GPPUDCLK0.set(modified);
-            arch::spin_for_cycles(150);
-
-            inner.GPPUD.set(0);
-            inner.GPPUDCLK0.set(0);
-        })
-    }
-
     pub fn map_pl011_uart(&self) {
         let mut r = &self.inner;
         r.lock(|inner| {
@@ -126,6 +98,85 @@ impl GPIO {
             arch::spin_for_cycles(150);
 
             inner.GPPUDCLK0.set(0);
+        });
+    }
+}
+
+use interface::gpio::Pud;
+
+impl interface::gpio::Set for GPIO {
+    fn pullupdn(&self, pin: u32, pud: Pud) {
+        let pull = match pud {
+            Pud::PudOff => 0,
+            Pud::PudUp => 1,
+            Pud::PudDown => 2
+        };
+
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            inner.GPPUD.set(pull);
+            arch::spin_for_cycles(150);
+
+            let modified = (inner.GPPUDCLK0.get() as u32) | (1 << pin);
+            inner.GPPUDCLK0.set(modified);
+            arch::spin_for_cycles(150);
+
+            inner.GPPUD.set(0);
+            inner.GPPUDCLK0.set(0);
+        });
+    }
+
+    fn setup(&self, pin: u32, direction: u32, pud: interface::gpio::Pud) {
+        self.pullupdn(pin, pud);
+
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            match pin {
+                0..10 => {
+                    let modified = (inner.GPFSEL0.get() as u32) | (direction << (pin * 3));
+                    inner.GPFSEL0.set(modified);
+                },
+                10..20 => {
+                    let modified = (inner.GPFSEL1.get() as u32) | (direction << ((pin - 10) * 3));
+                    inner.GPFSEL1.set(modified);
+                },
+                20..29 => {
+                    let modified = (inner.GPFSEL2.get() as u32) | (direction << ((pin - 20) * 3));
+                    inner.GPFSEL2.set(modified);
+                },
+                _ => {
+                    arch::spin_for_cycles(1);
+                },
+            }
+        });
+    }
+
+    fn cleanup(&self) {
+        arch::spin_for_cycles(1);
+    }
+
+}
+impl interface::gpio::Output for GPIO {
+    fn output(&self, pin: u32, value: u32) {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            if value == 0 {
+                let modified = (inner.GPSET0.get() as u32) | (1 << pin);
+                inner.GPSET0.set(modified);
+            } else {
+                let modified = (inner.GPCLR0.get() as u32) | (1 << pin);
+                inner.GPCLR0.set(modified);
+            }
+        });
+    }
+
+}
+
+impl interface::gpio::Input for GPIO {    
+    fn input(&self, pin: u32) -> u32 {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            (inner.GPLEV1.get() as u32 >> pin ) | 1
         })
     }
 }

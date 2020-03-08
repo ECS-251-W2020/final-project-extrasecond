@@ -23,7 +23,35 @@ pub mod console {
         }
     }
 
-    pub trait All = Write + Read + Statistics;
+    pub trait ConsoleAll = Write + Read + Statistics;
+}
+
+
+pub mod gpio {
+
+    pub enum Pud {
+        PudOff, 
+        PudUp, 
+        PudDown
+    }
+
+    pub trait Set {
+        fn pullupdn(&self, pin: u32, pud: Pud);
+
+        fn setup(&self, pin: u32, direction: u32, pud: Pud);
+
+        fn cleanup(&self);
+    }
+
+    pub trait Output {
+        fn output(&self, pin: u32, value: u32);
+    }
+
+    pub trait Input {
+        fn input(&self, pin: u32) -> u32;
+    }
+
+    pub trait GPIOAll = Set + Output + Input;
 }
 
 pub mod driver {
