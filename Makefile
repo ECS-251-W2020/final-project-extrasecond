@@ -58,7 +58,7 @@ qemuasm: all
 		$(DOCKER_EXEC_QEMU) $(QEMU_RELEASE_ARGS)     \
 		-kernel $(OUTPUT) -d in_asm
 
-chainboot:
+chainboot: all
 	@$(DOCKER_CMD) $(DOCKER_ARG_DIR_TUT) $(DOCKER_ARG_DIR_UTILS) $(DOCKER_ARG_TTY) \
 		$(DOCKER_IMAGE) $(DOCKER_EXEC_MINIPUSH) $(DEV_SERIAL)                  \
 		$(OUTPUT)
@@ -75,5 +75,3 @@ readelf:
 objdump:
 	cargo objdump --target $(TARGET) -- -disassemble -no-show-raw-insn -print-imm-hex ritos
 
-clean:
-	rm -rf target

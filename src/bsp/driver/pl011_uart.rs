@@ -189,8 +189,23 @@ impl interface::console::Read for PL011Uart {
     fn read_char(&mut self) -> char {
         let r = &mut self.inner;
         r.lock(|inner| {
+            // Spin while RX FIFO empty is set.
+            while inner.FR.matches_all(FR::RXFE::SET) {
+                nop();
+            }
+
             // Read one character.
-            inner.DR.get() as u8 as char
+            let mut ret = inner.DR.get() as u8 as char;
+
+            // Convert carrige return to newline.
+            if ret == '\r' {
+                ret = '\n'
+            }
+
+            // Update statistics.
+            inner.chars_read += 1;
+
+            ret
         })
     }
 
