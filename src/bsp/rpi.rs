@@ -7,8 +7,10 @@ use core::fmt;
 pub const BOOT_CORE_ID: u64 = 0;
 pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
 
+/*
 /// The address on which the RPi3 firmware loads every binary by default.
 pub const BOARD_DEFAULT_LOAD_ADDRESS: usize = 0x80_000;
+*/
 
 static mut GPIO: driver::GPIO = unsafe { driver::GPIO::new(memory_map::mmio::GPIO_BASE) };
 

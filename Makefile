@@ -12,7 +12,7 @@ RUSTC_MISC_ARGS   = -C target-cpu=cortex-a53 -C relocation-model=pic
 CHAINBOOT_DEMO_PAYLOAD = demo_payload_rpi3.img
 
 RUSTFLAGS          = -C link-arg=-T$(LINKER_FILE) $(RUSTC_MISC_ARGS)
-RUSTFLAGS_PEDANTIC = $(RUSTFLAGS) -D warnings
+RUSTFLAGS_PEDANTIC = $(RUSTFLAGS) 
 
 SOURCES = $(wildcard **/*.rs) $(wildcard **/*.S) $(wildcard **/*.ld)
 
@@ -35,7 +35,7 @@ DOCKER_ARG_TTY       = --privileged -v /dev:/dev
 DOCKER_EXEC_QEMU     = $(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE)
 DOCKER_EXEC_MINIPUSH = ruby /utils/minipush.rb
 
-.PHONY: all doc qemu qemuasm chainboot clippy clean
+.PHONY: all doc qemu chainboot jtagboot openocd gdb gdb-opt0 clippy clean readelf objdump nm
 
 all: clean $(OUTPUT)
 
@@ -66,6 +66,15 @@ chainboot:
 
 clippy:
 	RUSTFLAGS="$(RUSTFLAGS_PEDANTIC)" cargo xclippy --target=$(TARGET) --features bsp_$(BSP)
+
+clean:
+	rm -rf target
+
+readelf:
+	readelf -a ritos
+
+objdump:
+	cargo objdump --target $(TARGET) -- -disassemble -no-show-raw-insn -print-imm-hex ritos
 
 clean:
 	rm -rf target

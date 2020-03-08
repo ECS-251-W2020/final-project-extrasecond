@@ -4,6 +4,7 @@
 
 //! Relocation code.
 
+/*
 /// Relocates the own binary from `bsp::BOARD_DEFAULT_LOAD_ADDRESS` to the `__binary_start` address
 /// from the linker script.
 ///
@@ -44,3 +45,4 @@ pub unsafe fn relocate_self<T>() -> ! {
     // comments.
     crate::runtime_init::get().runtime_init()
 }
+*/

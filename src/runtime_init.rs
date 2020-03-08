@@ -17,7 +17,7 @@ unsafe fn bss_range() -> Range<*mut usize> {
 unsafe fn zero_bss() {
     memory::zero_volatile(bss_range());
 }
-
+/*
 /// We are outsmarting the compiler here by using a trait as a layer of indirection. Because we are
 /// generating PIC code, a static dispatch to `init()` would generate a relative jump from the
 /// callee to `init()`. However, when calling `init()`, code just finished copying the binary to the
@@ -46,4 +46,11 @@ impl RunTimeInit for DynamicInit {}
 /// Give the callee a `RunTimeInit` trait object.
 pub fn get() -> &'static dyn RunTimeInit {
     &DynamicInit {}
- }
+}
+*/
+
+pub unsafe fn runtime_init() -> ! {
+    zero_bss();
+
+    crate::kernel_init()
+}
