@@ -62,6 +62,6 @@ impl<T> interface::sync::Mutex for ArmLock<T>{
         self.acquire_lock();
         let ret = f(unsafe { &mut *self.data.get() });
         self.release_lock();
-        ret        
+        ret
     }
 }*/

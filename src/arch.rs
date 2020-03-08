@@ -1,7 +1,7 @@
 mod aarch64;
 
-pub use aarch64::*;
 pub use aarch64::sync::*;
+pub use aarch64::*;
 
 /// Architectural privilege level.
 #[derive(PartialEq)]

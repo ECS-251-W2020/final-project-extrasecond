@@ -32,9 +32,11 @@ pub unsafe fn panic_console_out() -> impl fmt::Write {
 }
 
 pub fn device_drivers() -> [&'static mut dyn interface::driver::DeviceDriver; 2] {
-    unsafe { [&mut GPIO, &mut PL011_UART] } 
+    unsafe { [&mut GPIO, &mut PL011_UART] }
 }
 
 pub fn post_driver_init() {
-    unsafe { GPIO.map_pl011_uart(); }
+    unsafe {
+        GPIO.map_pl011_uart();
+    }
 }

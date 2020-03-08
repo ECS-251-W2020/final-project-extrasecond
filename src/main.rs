@@ -10,7 +10,6 @@ mod interface;
 mod memory;
 mod panic;
 mod print;
-mod relocate;
 mod runtime_init;
 
 unsafe fn kernel_init() -> ! {
@@ -24,9 +23,8 @@ unsafe fn kernel_init() -> ! {
 }
 
 fn kernel_main() -> ! {
-    use interface::console::All;
-    use interface::time::Timer;
     use core::time::Duration;
+    use interface::{console::All, time::Timer};
 
     info!("Booting on: {}", bsp::board_name());
 
