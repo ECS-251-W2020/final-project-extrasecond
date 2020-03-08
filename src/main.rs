@@ -3,6 +3,8 @@
 #![no_std]
 #![feature(panic_info_message)]
 #![feature(trait_alias)]
+#![feature(asm)]
+#![feature(global_asm)]
 
 mod arch;
 mod bsp;
@@ -13,13 +15,12 @@ mod print;
 mod runtime_init;
 
 unsafe fn kernel_init() -> ! {
-    for i in bsp::device_drivers().iter() {
+    for i in bsp::device_drivers().iter_mut() {
         if let Err(()) = i.init() {
             panic!("Error loading driver: {}", i.compatible())
         }
     }
     bsp::post_driver_init();
-
     kernel_main()
 }
 

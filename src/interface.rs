@@ -2,23 +2,23 @@ pub mod console {
     use core::fmt;
 
     pub trait Write {
-        fn write_fmt(&self, args: fmt::Arguments) -> fmt::Result;
+        fn write_fmt(&mut self, args: fmt::Arguments) -> fmt::Result;
 
-        fn write_char(&self, c: char);
+        fn write_char(&mut self, c: char);
     }
 
     pub trait Read {
-        fn read_char(&self) -> char {
+        fn read_char(&mut self) -> char {
             ' '
         }
     }
 
     pub trait Statistics {
-        fn chars_written(&self) -> usize {
+        fn chars_written(&mut self) -> usize {
             0
         }
 
-        fn chars_read(&self) -> usize {
+        fn chars_read(&mut self) -> usize {
             0
         }
     }
@@ -32,7 +32,7 @@ pub mod driver {
     pub trait DeviceDriver {
         fn compatible(&self) -> &str;
 
-        fn init(&self) -> Result {
+        fn init(&mut self) -> Result {
             Ok(())
         }
     }

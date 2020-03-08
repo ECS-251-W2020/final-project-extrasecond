@@ -135,19 +135,17 @@ impl fmt::Write for PL011UartInner {
     }
 }
 
-use interface::sync::Mutex;
+use crate::interface::sync::Mutex;
 // use spin::Mutex;
 
 pub struct PL011Uart {
     inner: Lock<PL011UartInner>,
-    // inner: Mutex<PL011UartInner>,
 }
 
 impl PL011Uart {
     pub const unsafe fn new(base_addr: usize) -> PL011Uart {
         PL011Uart {
             inner: Lock::new(PL011UartInner::new(base_addr)),
-            // inner: Mutex::new(PL011UartInner::new(base_addr)),
         }
     }
 }
@@ -157,32 +155,29 @@ impl interface::driver::DeviceDriver for PL011Uart {
         "PL011Uart"
     }
 
-    fn init(&self) -> interface::driver::Result {
-        let mut r = &self.inner;
+    fn init(&mut self) -> interface::driver::Result {
+        let r = &mut self.inner;
         r.lock(|inner| inner.init());
-        // self.inner.lock().init();
 
         Ok(())
     }
 }
 
 impl interface::console::Write for PL011Uart {
-    fn write_char(&self, c: char) {
-        let mut r = &self.inner;
+    fn write_char(&mut self, c: char) {
+        let r = &mut self.inner;
         r.lock(|inner| inner.write_char(c));
-        // self.inner.lock().write_char(c);
     }
 
-    fn write_fmt(&self, args: fmt::Arguments) -> fmt::Result {
-        let mut r = &self.inner;
+    fn write_fmt(&mut self, args: fmt::Arguments) -> fmt::Result {
+        let r = &mut self.inner;
         r.lock(|inner| fmt::Write::write_fmt(inner, args))
-        // self.inner.lock().write_fmt(args)
     }
 }
 
 impl interface::console::Read for PL011Uart {
-    fn read_char(&self) -> char {
-        let mut r = &self.inner;
+    fn read_char(&mut self) -> char {
+        let r = &mut self.inner;
         r.lock(|inner| {
             while inner.FR.matches_all(FR::RXFE::SET) {
                 nop();
@@ -198,36 +193,18 @@ impl interface::console::Read for PL011Uart {
 
             ret
         })
-
-        /*
-        let mut r = self.inner.lock();
-        while r.FR.matches_all(FR::RXFE::SET) {
-            nop();
-        }
-
-        let mut ret = r.DR.get() as u8 as char;
-        if ret == '\r' {
-            ret = '\n'
-        }
-
-        r.chars_read += 1;
-
-        ret
-         */
     }
 }
 
 impl interface::console::Statistics for PL011Uart {
-    fn chars_written(&self) -> usize {
-        let mut r = &self.inner;
+    fn chars_written(&mut self) -> usize {
+        let r = &mut self.inner;
         r.lock(|inner| inner.chars_written)
-        // self.inner.lock().chars_written
     }
 
-    fn chars_read(&self) -> usize {
-        let mut r = &self.inner;
+    fn chars_read(&mut self) -> usize {
+        let r = &mut self.inner;
         r.lock(|inner| inner.chars_read)
-        // self.inner.lock().chars_read
     }
 }
 

@@ -4,7 +4,7 @@ SECTIONS
 
     .text : 
     {
-        *(.text._start) *(.text*)
+        *(.text._start) *(.text.atomic_cmpset) *(.text*)
     }
 
     .rodata : 
