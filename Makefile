@@ -9,7 +9,6 @@ QEMU_MACHINE_TYPE 	= raspi3
 QEMU_RELEASE_ARGS 	= -serial stdio -display none
 LINKER_FILE       = src/bsp/rpi/link.ld
 RUSTC_MISC_ARGS   = -C target-cpu=cortex-a53 -C relocation-model=pic
-CHAINBOOT_DEMO_PAYLOAD = demo_payload_rpi3.img
 
 RUSTFLAGS          = -C link-arg=-T$(LINKER_FILE) $(RUSTC_MISC_ARGS)
 RUSTFLAGS_PEDANTIC = $(RUSTFLAGS) -D warnings
@@ -62,7 +61,7 @@ qemuasm: all
 chainboot:
 	@$(DOCKER_CMD) $(DOCKER_ARG_DIR_TUT) $(DOCKER_ARG_DIR_UTILS) $(DOCKER_ARG_TTY) \
 		$(DOCKER_IMAGE) $(DOCKER_EXEC_MINIPUSH) $(DEV_SERIAL)                  \
-		$(CHAINBOOT_DEMO_PAYLOAD) -kernel $(OUTPUT) -d in_asm
+		$(OUTPUT)
 
 clippy:
 	RUSTFLAGS="$(RUSTFLAGS_PEDANTIC)" cargo xclippy --target=$(TARGET) --features bsp_$(BSP)
