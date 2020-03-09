@@ -31,10 +31,10 @@ unsafe fn kernel_init() -> ! {
 }
 
 fn kernel_main() -> ! {
-    use core::time::Duration;
-    use interface::time::Timer;
     use crate::interface::console::ConsoleAll;
+    use core::time::Duration;
     use interface::gpio::GPIOAll;
+    use interface::time::Timer;
 
     info!("Hit ENTER to continue...");
     loop {
@@ -77,12 +77,12 @@ fn kernel_main() -> ! {
     bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
     bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
 
-    loop{
+    loop {
         info!("Spinning for 1 second");
         arch::timer().spin_for(Duration::from_secs(1));
     }
 
-/*    info!("Echoing input now");
+    /*    info!("Echoing input now");
 
     loop {
         let c = bsp::console().read_char();

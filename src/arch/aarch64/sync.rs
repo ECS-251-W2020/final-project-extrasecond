@@ -1,1 +1,1 @@
-pub use spin::Mutex as Mutex;
+pub use spin::Mutex;

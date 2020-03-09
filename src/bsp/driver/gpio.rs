@@ -117,7 +117,6 @@ impl interface::gpio::Set for GPIO {
 
         inner.GPPUD.set(0);
         inner.GPPUDCLK0.set(0);
-
     }
 
     fn setup(&self, pin: u32, direction: u32, pud: interface::gpio::Pud) {
