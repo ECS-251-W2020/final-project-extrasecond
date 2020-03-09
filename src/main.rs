@@ -3,6 +3,7 @@
 #![no_std]
 #![feature(panic_info_message)]
 #![feature(trait_alias)]
+#![feature(exclusive_range_pattern)]
 
 #![allow(incomplete_features)]
 #![feature(const_generics)]
@@ -32,11 +33,20 @@ unsafe fn kernel_init() -> ! {
 
 fn kernel_main() -> ! {
     use core::time::Duration;
-    use interface::{console::All, time::Timer};
-    use spin::Mutex;
+    use interface::{time::Timer};
+//    use spin::Mutex;
+    use interface::gpio::GPIOAll;
+    use crate::interface::console::ConsoleAll;
+
+    loop {
+        if bsp::console().read_char() == '\n' {
+            break;
+        }
+    }
 
     info!("Virtual Memory");
 
+    /*
     info!("Test spin lock");
     let lock_data = Mutex::new(Some(1));
     {
@@ -47,7 +57,7 @@ fn kernel_main() -> ! {
             None => {},
         };
         info!("data: {:?}", data);
-    }
+    }*/
 
     info!("Booting on: {}", bsp::board_name());
     
@@ -72,7 +82,23 @@ fn kernel_main() -> ! {
     info!("Timer test, spinning for 1 second");
     arch::timer().spin_for(Duration::from_secs(1));
 
+
+    bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
+    bsp::gpio().output(0, 1);
+    bsp::gpio().input(1);
+
+    bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
+    bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
+
+    bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
+    bsp::gpio().output(0, 1);
+    bsp::gpio().input(1);
+
+    bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
+    bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
+
     info!("Echoing input now");
+
     loop {
         let c = bsp::console().read_char();
         bsp::console().write_char(c);

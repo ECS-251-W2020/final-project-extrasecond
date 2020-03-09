@@ -23,8 +23,12 @@ pub fn board_name() -> &'static str {
     "Raspberry Pi 3"
 }
 
-pub fn console() -> &'static mut impl interface::console::All {
+pub fn console() -> &'static mut impl interface::console::ConsoleAll {
     unsafe { &mut PL011_UART }
+}
+
+pub fn gpio() -> &'static mut impl interface::gpio::GPIOAll {
+    unsafe { &mut GPIO }
 }
 
 pub unsafe fn panic_console_out() -> impl fmt::Write {
