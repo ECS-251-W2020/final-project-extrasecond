@@ -50,10 +50,7 @@ fn kernel_main() -> ! {
     }
 
     info!("Booting on: {}", bsp::board_name());
-
-    info!("MMU online. Special regions:");
-    bsp::virt_mem_layout().print_layout();
-
+    
     info!("{}", bsp::virt_mem_layout());
 
     let (_, privilege_level) = arch::state::current_privilege_level();
@@ -74,13 +71,6 @@ fn kernel_main() -> ! {
 
     info!("Timer test, spinning for 1 second");
     arch::timer().spin_for(Duration::from_secs(1));
-
-    let mut remapped_uart = unsafe { bsp::driver::PL011Uart::new(0x1FFF_1000) };
-    writeln!(
-        remapped_uart,
-        "[     !!!    ] Writing through the remapped UART at 0x1FFF_1000"
-    )
-    .unwrap();
 
     info!("Echoing input now");
     loop {

@@ -130,6 +130,7 @@ impl<const NUM_SPECIAL_RANGES: usize> KernelVirtualLayout<{NUM_SPECIAL_RANGES}> 
         }
         Ok((virt_addr, AttributeFields::default()))
     }
+    #[allow(dead_code)]
     pub fn print_layout(&self) {
         use crate::info;
 
