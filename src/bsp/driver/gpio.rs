@@ -82,9 +82,9 @@ impl GPIO {
         }
     }
 
-    pub fn map_pl011_uart(&mut self) {
-        let r = &mut self.inner;
-        r.lock(|inner| {
+    pub fn map_pl011_uart(&self) {
+        let r = &self.inner;
+        r.mutex_use(|inner| {
             inner
                 .GPFSEL1
                 .modify(GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0);
@@ -105,15 +105,15 @@ impl GPIO {
 use interface::gpio::Pud;
 
 impl interface::gpio::Set for GPIO {
-    fn pullupdn(&mut self, pin: u32, pud: Pud) {
+    fn pullupdn(&self, pin: u32, pud: Pud) {
         let pull = match pud {
             Pud::PudOff => 0,
             Pud::PudUp => 1,
             Pud::PudDown => 2,
         };
 
-        let r = &mut self.inner;
-        r.lock(|inner| {
+        let r = &self.inner;
+        r.mutex_use(|inner| {
             inner.GPPUD.set(pull);
             arch::spin_for_cycles(150);
 
@@ -126,11 +126,11 @@ impl interface::gpio::Set for GPIO {
         });
     }
 
-    fn setup(&mut self, pin: u32, direction: u32, pud: interface::gpio::Pud) {
+    fn setup(&self, pin: u32, direction: u32, pud: interface::gpio::Pud) {
         self.pullupdn(pin, pud);
 
-        let r = &mut self.inner;
-        r.lock(|inner| match pin {
+        let r = &self.inner;
+        r.mutex_use(|inner| match pin {
             0..10 => {
                 let modified = (inner.GPFSEL0.get() as u32) | (direction << (pin * 3));
                 inner.GPFSEL0.set(modified);
@@ -149,14 +149,14 @@ impl interface::gpio::Set for GPIO {
         });
     }
 
-    fn cleanup(&mut self) {
+    fn cleanup(&self) {
         arch::spin_for_cycles(1);
     }
 }
 impl interface::gpio::Output for GPIO {
-    fn output(&mut self, pin: u32, value: u32) {
-        let r = &mut self.inner;
-        r.lock(|inner| {
+    fn output(&self, pin: u32, value: u32) {
+        let r = &self.inner;
+        r.mutex_use(|inner| {
             if value == 0 {
                 let modified = (inner.GPSET0.get() as u32) | (1 << pin);
                 inner.GPSET0.set(modified);
@@ -169,9 +169,9 @@ impl interface::gpio::Output for GPIO {
 }
 
 impl interface::gpio::Input for GPIO {
-    fn input(&mut self, pin: u32) -> u32 {
-        let r = &mut self.inner;
-        r.lock(|inner| (inner.GPLEV1.get() as u32 >> pin) | 1)
+    fn input(&self, pin: u32) -> u32 {
+        let r = &self.inner;
+        r.mutex_use(|inner| (inner.GPLEV1.get() as u32 >> pin) | 1)
     }
 }
 

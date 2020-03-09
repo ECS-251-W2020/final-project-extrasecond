@@ -155,29 +155,29 @@ impl interface::driver::DeviceDriver for PL011Uart {
         "PL011Uart"
     }
 
-    fn init(&mut self) -> interface::driver::Result {
-        let r = &mut self.inner;
-        r.lock(|inner| inner.init());
+    fn init(&self) -> interface::driver::Result {
+        let r = &self.inner;
+        r.mutex_use(|inner| inner.init());
 
         Ok(())
     }
 }
 
 impl interface::console::Write for PL011Uart {
-    fn write_char(&mut self, c: char) {
-        let r = &mut self.inner;
-        r.lock(|inner| inner.write_char(c));
+    fn write_char(&self, c: char) {
+        let r = &self.inner;
+        r.mutex_use(|inner| inner.write_char(c));
     }
 
-    fn write_fmt(&mut self, args: fmt::Arguments) -> fmt::Result {
-        let r = &mut self.inner;
-        r.lock(|inner| fmt::Write::write_fmt(inner, args))
+    fn write_fmt(&self, args: fmt::Arguments) -> fmt::Result {
+        let r = &self.inner;
+        r.mutex_use(|inner| fmt::Write::write_fmt(inner, args))
     }
 
-    fn flush(&mut self) {
-        let r = &mut self.inner;
+    fn flush(&self) {
+        let r = &self.inner;
         // Spin until TX FIFO empty is set.
-        r.lock(|inner| {
+        r.mutex_use(|inner| {
             while !inner.FR.matches_all(FR::TXFE::SET) {
                 nop();
             }
@@ -186,9 +186,9 @@ impl interface::console::Write for PL011Uart {
 }
 
 impl interface::console::Read for PL011Uart {
-    fn read_char(&mut self) -> char {
-        let r = &mut self.inner;
-        r.lock(|inner| {
+    fn read_char(&self) -> char {
+        let r = &self.inner;
+        r.mutex_use(|inner| {
             // Spin while RX FIFO empty is set.
             while inner.FR.matches_all(FR::RXFE::SET) {
                 nop();
@@ -209,9 +209,9 @@ impl interface::console::Read for PL011Uart {
         })
     }
 
-    fn clear(&mut self) {
-        let r = &mut self.inner;
-        r.lock(|inner| {
+    fn clear(&self) {
+        let r = &self.inner;
+        r.mutex_use(|inner| {
             // Read from the RX FIFO until it is indicating empty.
             while !inner.FR.matches_all(FR::RXFE::SET) {
                 inner.DR.get();
@@ -221,14 +221,14 @@ impl interface::console::Read for PL011Uart {
 }
 
 impl interface::console::Statistics for PL011Uart {
-    fn chars_written(&mut self) -> usize {
-        let r = &mut self.inner;
-        r.lock(|inner| inner.chars_written)
+    fn chars_written(&self) -> usize {
+        let r = &self.inner;
+        r.mutex_use(|inner| inner.chars_written)
     }
 
-    fn chars_read(&mut self) -> usize {
-        let r = &mut self.inner;
-        r.lock(|inner| inner.chars_read)
+    fn chars_read(&self) -> usize {
+        let r = &self.inner;
+        r.mutex_use(|inner| inner.chars_read)
     }
 }
 

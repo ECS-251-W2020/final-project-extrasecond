@@ -2,28 +2,28 @@ pub mod console {
     use core::fmt;
 
     pub trait Write {
-        fn write_fmt(&mut self, args: fmt::Arguments) -> fmt::Result;
+        fn write_fmt(&self, args: fmt::Arguments) -> fmt::Result;
 
-        fn write_char(&mut self, c: char);
+        fn write_char(&self, c: char);
 
         /// Block execution until the last character has been physically put on the TX wire
         /// (draining TX buffers/FIFOs, if any).
-        fn flush(&mut self);
+        fn flush(&self);
     }
 
     pub trait Read {
-        fn read_char(&mut self) -> char {
+        fn read_char(&self) -> char {
             ' '
         }
-        fn clear(&mut self);
+        fn clear(&self);
     }
 
     pub trait Statistics {
-        fn chars_written(&mut self) -> usize {
+        fn chars_written(&self) -> usize {
             0
         }
 
-        fn chars_read(&mut self) -> usize {
+        fn chars_read(&self) -> usize {
             0
         }
     }
@@ -40,19 +40,19 @@ pub mod gpio {
     }
 
     pub trait Set {
-        fn pullupdn(&mut self, pin: u32, pud: Pud);
+        fn pullupdn(&self, pin: u32, pud: Pud);
 
-        fn setup(&mut self, pin: u32, direction: u32, pud: Pud);
+        fn setup(&self, pin: u32, direction: u32, pud: Pud);
 
-        fn cleanup(&mut self);
+        fn cleanup(&self);
     }
 
     pub trait Output {
-        fn output(&mut self, pin: u32, value: u32);
+        fn output(&self, pin: u32, value: u32);
     }
 
     pub trait Input {
-        fn input(&mut self, pin: u32) -> u32;
+        fn input(&self, pin: u32) -> u32;
     }
 
     pub trait GPIOAll = Set + Output + Input;
@@ -64,7 +64,7 @@ pub mod driver {
     pub trait DeviceDriver {
         fn compatible(&self) -> &str;
 
-        fn init(&mut self) -> Result {
+        fn init(&self) -> Result {
             Ok(())
         }
     }
@@ -74,7 +74,7 @@ pub mod sync {
     pub trait Mutex {
         type Data;
 
-        fn lock<R>(&mut self, f: impl FnOnce(&mut Self::Data) -> R) -> R;
+        fn mutex_use<R>(&self, f: impl FnOnce(&mut Self::Data) -> R) -> R;
     }
 }
 
