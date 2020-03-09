@@ -1,4 +1,5 @@
 mod exception;
+mod mmu;
 pub mod sync;
 mod time;
 
@@ -110,4 +111,10 @@ pub mod state {
         info!("      IRQ:    {}", to_mask_str(exception::is_masked::<IRQ>()));
         info!("      FIQ:    {}", to_mask_str(exception::is_masked::<FIQ>()));
     }
+}
+
+static MMU: mmu::MMU = mmu::MMU;
+
+pub fn mmu() -> &'static impl interface::mm::MMU{
+    &MMU
 }

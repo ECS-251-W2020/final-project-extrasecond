@@ -68,3 +68,9 @@ pub mod time {
         fn spin_for(&self, duration: Duration);
     }
 }
+
+pub mod mm {
+    pub trait MMU {
+        unsafe fn init(&self) -> Result<(), &'static str>;
+    }
+}

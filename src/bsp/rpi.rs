@@ -1,8 +1,10 @@
 mod memory_map;
+mod virt_mem_layout;
 
 use super::driver;
 use crate::interface;
 use core::fmt;
+use crate::memory::KernelVirtualLayout;
 
 pub const BOOT_CORE_ID: u64 = 0;
 pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
@@ -39,4 +41,14 @@ pub fn post_driver_init() {
     unsafe {
         GPIO.map_pl011_uart();
     }
+}
+
+/// Return a reference to the virtual memory layout.
+pub fn virt_mem_layout() -> &'static KernelVirtualLayout<{ virt_mem_layout::NUM_MEM_RANGES }> {
+    &virt_mem_layout::LAYOUT
+}
+
+/// Return the address space size in bytes.
+pub const fn addr_space_size() -> usize {
+    memory_map::mmio::END_INCLUSIVE + 1
 }
