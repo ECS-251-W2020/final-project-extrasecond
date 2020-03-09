@@ -33,30 +33,15 @@ unsafe fn kernel_init() -> ! {
 fn kernel_main() -> ! {
     use core::time::Duration;
     use interface::time::Timer;
-    //    use spin::Mutex;
     use crate::interface::console::ConsoleAll;
     use interface::gpio::GPIOAll;
 
+    info!("Hit ENTER to continue...");
     loop {
         if bsp::console().read_char() == '\n' {
             break;
         }
     }
-
-    info!("Virtual Memory");
-
-    /*
-    info!("Test spin lock");
-    let lock_data = Mutex::new(Some(1));
-    {
-        let mut data = lock_data.lock();
-        info!("data: {:?}", data);
-        match data.as_mut() {
-            Some(d) => *d += 1,
-            None => {},
-        };
-        info!("data: {:?}", data);
-    }*/
 
     info!("Booting on: {}", bsp::board_name());
 
@@ -78,9 +63,6 @@ fn kernel_main() -> ! {
         info!("      {}. {}", i + 1, driver.compatible());
     }
 
-    info!("Timer test, spinning for 1 second");
-    arch::timer().spin_for(Duration::from_secs(1));
-
     bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
     bsp::gpio().output(0, 1);
     bsp::gpio().input(1);
@@ -95,10 +77,15 @@ fn kernel_main() -> ! {
     bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
     bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
 
-    info!("Echoing input now");
+    loop{
+        info!("Spinning for 1 second");
+        arch::timer().spin_for(Duration::from_secs(1));
+    }
+
+/*    info!("Echoing input now");
 
     loop {
         let c = bsp::console().read_char();
         bsp::console().write_char(c);
-    }
+    }*/
 }

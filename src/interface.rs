@@ -70,14 +70,6 @@ pub mod driver {
     }
 }
 
-pub mod sync {
-    pub trait Mutex {
-        type Data;
-
-        fn mutex_use<R>(&self, f: impl FnOnce(&mut Self::Data) -> R) -> R;
-    }
-}
-
 pub mod time {
     use core::time::Duration;
 

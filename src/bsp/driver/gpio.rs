@@ -1,4 +1,4 @@
-use crate::{arch, arch::Lock, interface};
+use crate::{arch, arch::Mutex, interface};
 use core::ops;
 use register::{mmio::ReadWrite, register_bitfields, register_structs};
 
@@ -68,37 +68,32 @@ impl GPIOInner {
     }
 }
 
-// use spin::Mutex;
-use crate::interface::sync::Mutex;
-
 pub struct GPIO {
-    inner: Lock<GPIOInner>,
+    inner: Mutex<GPIOInner>,
 }
 
 impl GPIO {
     pub const unsafe fn new(base_addr: usize) -> GPIO {
         GPIO {
-            inner: Lock::new(GPIOInner::new(base_addr)),
+            inner: Mutex::new(GPIOInner::new(base_addr)),
         }
     }
 
     pub fn map_pl011_uart(&self) {
-        let r = &self.inner;
-        r.mutex_use(|inner| {
-            inner
-                .GPFSEL1
-                .modify(GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0);
+        let inner = &self.inner.lock();
+        inner
+            .GPFSEL1
+            .modify(GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0);
 
-            inner.GPPUD.set(0);
-            arch::spin_for_cycles(150);
+        inner.GPPUD.set(0);
+        arch::spin_for_cycles(150);
 
-            let modified = (inner.GPPUDCLK0.get() as u32) | (1 << 14) | (1 << 15);
-            inner.GPPUDCLK0.set(modified);
+        let modified = (inner.GPPUDCLK0.get() as u32) | (1 << 14) | (1 << 15);
+        inner.GPPUDCLK0.set(modified);
 
-            arch::spin_for_cycles(150);
+        arch::spin_for_cycles(150);
 
-            inner.GPPUDCLK0.set(0);
-        });
+        inner.GPPUDCLK0.set(0);
     }
 }
 
@@ -112,25 +107,24 @@ impl interface::gpio::Set for GPIO {
             Pud::PudDown => 2,
         };
 
-        let r = &self.inner;
-        r.mutex_use(|inner| {
-            inner.GPPUD.set(pull);
-            arch::spin_for_cycles(150);
+        let inner = &self.inner.lock();
+        inner.GPPUD.set(pull);
+        arch::spin_for_cycles(150);
 
-            let modified = (inner.GPPUDCLK0.get() as u32) | (1 << pin);
-            inner.GPPUDCLK0.set(modified);
-            arch::spin_for_cycles(150);
+        let modified = (inner.GPPUDCLK0.get() as u32) | (1 << pin);
+        inner.GPPUDCLK0.set(modified);
+        arch::spin_for_cycles(150);
 
-            inner.GPPUD.set(0);
-            inner.GPPUDCLK0.set(0);
-        });
+        inner.GPPUD.set(0);
+        inner.GPPUDCLK0.set(0);
+
     }
 
     fn setup(&self, pin: u32, direction: u32, pud: interface::gpio::Pud) {
         self.pullupdn(pin, pud);
 
-        let r = &self.inner;
-        r.mutex_use(|inner| match pin {
+        let inner = &self.inner.lock();
+        match pin {
             0..10 => {
                 let modified = (inner.GPFSEL0.get() as u32) | (direction << (pin * 3));
                 inner.GPFSEL0.set(modified);
@@ -146,7 +140,7 @@ impl interface::gpio::Set for GPIO {
             _ => {
                 arch::spin_for_cycles(1);
             }
-        });
+        };
     }
 
     fn cleanup(&self) {
@@ -155,23 +149,21 @@ impl interface::gpio::Set for GPIO {
 }
 impl interface::gpio::Output for GPIO {
     fn output(&self, pin: u32, value: u32) {
-        let r = &self.inner;
-        r.mutex_use(|inner| {
-            if value == 0 {
-                let modified = (inner.GPSET0.get() as u32) | (1 << pin);
-                inner.GPSET0.set(modified);
-            } else {
-                let modified = (inner.GPCLR0.get() as u32) | (1 << pin);
-                inner.GPCLR0.set(modified);
-            }
-        });
+        let inner = &self.inner.lock();
+        if value == 0 {
+            let modified = (inner.GPSET0.get() as u32) | (1 << pin);
+            inner.GPSET0.set(modified);
+        } else {
+            let modified = (inner.GPCLR0.get() as u32) | (1 << pin);
+            inner.GPCLR0.set(modified);
+        }
     }
 }
 
 impl interface::gpio::Input for GPIO {
     fn input(&self, pin: u32) -> u32 {
-        let r = &self.inner;
-        r.mutex_use(|inner| (inner.GPLEV1.get() as u32 >> pin) | 1)
+        let inner = &self.inner.lock();
+        (inner.GPLEV1.get() as u32 >> pin) | 1
     }
 }
 
