@@ -115,6 +115,6 @@ pub mod state {
 
 static MMU: mmu::MMU = mmu::MMU;
 
-pub fn mmu() -> &'static impl interface::mm::MMU{
+pub fn mmu() -> &'static impl interface::mm::MMU {
     &MMU
 }

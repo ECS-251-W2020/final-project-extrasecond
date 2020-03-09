@@ -27,7 +27,7 @@ pub static LAYOUT: KernelVirtualLayout<{ NUM_MEM_RANGES }> = KernelVirtualLayout
                 mem_attributes: MemAttributes::CacheableDRAM,
                 acc_perms: AccessPermissions::ReadOnly,
                 execute_never: false,
-            }
+            },
         },
         RangeDescriptor {
             name: "Device MMIO",
@@ -41,5 +41,5 @@ pub static LAYOUT: KernelVirtualLayout<{ NUM_MEM_RANGES }> = KernelVirtualLayout
                 execute_never: true,
             },
         },
-    ]
+    ],
 );

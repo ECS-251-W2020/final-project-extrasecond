@@ -4,7 +4,6 @@
 #![feature(panic_info_message)]
 #![feature(trait_alias)]
 #![feature(exclusive_range_pattern)]
-
 #![allow(incomplete_features)]
 #![feature(const_generics)]
 
@@ -33,10 +32,10 @@ unsafe fn kernel_init() -> ! {
 
 fn kernel_main() -> ! {
     use core::time::Duration;
-    use interface::{time::Timer};
-//    use spin::Mutex;
-    use interface::gpio::GPIOAll;
+    use interface::time::Timer;
+    //    use spin::Mutex;
     use crate::interface::console::ConsoleAll;
+    use interface::gpio::GPIOAll;
 
     loop {
         if bsp::console().read_char() == '\n' {
@@ -60,7 +59,7 @@ fn kernel_main() -> ! {
     }*/
 
     info!("Booting on: {}", bsp::board_name());
-    
+
     info!("{}", bsp::virt_mem_layout());
 
     let (_, privilege_level) = arch::state::current_privilege_level();
@@ -81,7 +80,6 @@ fn kernel_main() -> ! {
 
     info!("Timer test, spinning for 1 second");
     arch::timer().spin_for(Duration::from_secs(1));
-
 
     bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
     bsp::gpio().output(0, 1);

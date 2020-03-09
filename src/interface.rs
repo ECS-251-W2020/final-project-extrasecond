@@ -31,13 +31,12 @@ pub mod console {
     pub trait ConsoleAll = Write + Read + Statistics;
 }
 
-
 pub mod gpio {
 
     pub enum Pud {
-        PudOff, 
-        PudUp, 
-        PudDown
+        PudOff,
+        PudUp,
+        PudDown,
     }
 
     pub trait Set {

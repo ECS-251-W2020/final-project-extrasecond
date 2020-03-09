@@ -3,8 +3,8 @@ mod virt_mem_layout;
 
 use super::driver;
 use crate::interface;
-use core::fmt;
 use crate::memory::KernelVirtualLayout;
+use core::fmt;
 
 pub const BOOT_CORE_ID: u64 = 0;
 pub const BOOT_CORE_STACK_START: u64 = 0x80_000;

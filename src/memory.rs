@@ -1,6 +1,5 @@
-use core::ops::{Range, RangeInclusive};
 use core::fmt;
-
+use core::ops::{Range, RangeInclusive};
 
 pub unsafe fn zero_volatile<T>(range: Range<*mut T>)
 where
@@ -103,24 +102,27 @@ impl fmt::Display for RangeDescriptor {
     }
 }
 
-pub struct KernelVirtualLayout<const NUM_SPECIAL_RANGES: usize>{
+pub struct KernelVirtualLayout<const NUM_SPECIAL_RANGES: usize> {
     max_virt_addr_inclusive: usize,
     inner: [RangeDescriptor; NUM_SPECIAL_RANGES],
 }
 
-impl<const NUM_SPECIAL_RANGES: usize> KernelVirtualLayout<{NUM_SPECIAL_RANGES}> {
-    pub const fn new(max: usize, layout: [RangeDescriptor; NUM_SPECIAL_RANGES]) -> Self{
+impl<const NUM_SPECIAL_RANGES: usize> KernelVirtualLayout<{ NUM_SPECIAL_RANGES }> {
+    pub const fn new(max: usize, layout: [RangeDescriptor; NUM_SPECIAL_RANGES]) -> Self {
         Self {
             max_virt_addr_inclusive: max,
             inner: layout,
         }
     }
-    pub fn get_virtual_addr_properties(&self, virt_addr: usize) -> Result<(usize, AttributeFields), &'static str>{
+    pub fn get_virtual_addr_properties(
+        &self,
+        virt_addr: usize,
+    ) -> Result<(usize, AttributeFields), &'static str> {
         if virt_addr > self.max_virt_addr_inclusive {
             return Err("Address out of bound");
         }
         for i in self.inner.iter() {
-            if (i.virtual_range)().contains(&virt_addr){
+            if (i.virtual_range)().contains(&virt_addr) {
                 let output_addr = match i.translation {
                     Translation::Identity => virt_addr,
                     Translation::Offset(a) => a + (virt_addr - (i.virtual_range)().start()),
@@ -140,11 +142,11 @@ impl<const NUM_SPECIAL_RANGES: usize> KernelVirtualLayout<{NUM_SPECIAL_RANGES}> 
     }
 }
 
-impl<const NUM_SPECIAL_RANGES: usize> fmt::Display for KernelVirtualLayout<{NUM_SPECIAL_RANGES}>{
+impl<const NUM_SPECIAL_RANGES: usize> fmt::Display for KernelVirtualLayout<{ NUM_SPECIAL_RANGES }> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "Max Virtual Address: {}", self.max_virt_addr_inclusive)?;
-        for i in self.inner.iter(){
-            writeln!(f, "{}", i)?; 
+        for i in self.inner.iter() {
+            writeln!(f, "{}", i)?;
         }
         Ok(())
     }
