@@ -147,9 +147,9 @@ impl interface::gpio::Set for GPIO {
     }
 }
 impl interface::gpio::Output for GPIO {
-    fn output(&self, pin: u32, value: u32) {
+    fn output(&self, pin: u32, value: u32){
         let inner = &self.inner.lock();
-        if value == 0 {
+        if value == 1 {
             let modified = (inner.GPSET0.get() as u32) | (1 << pin);
             inner.GPSET0.set(modified);
         } else {
@@ -162,7 +162,7 @@ impl interface::gpio::Output for GPIO {
 impl interface::gpio::Input for GPIO {
     fn input(&self, pin: u32) -> u32 {
         let inner = &self.inner.lock();
-        (inner.GPLEV1.get() as u32 >> pin) | 1
+        (inner.GPLEV1.get() as u32 >> pin) & 1
     }
 }
 

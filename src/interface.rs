@@ -48,7 +48,7 @@ pub mod gpio {
     }
 
     pub trait Output {
-        fn output(&self, pin: u32, value: u32);
+        fn output(&self, pin: u32, value: u32) -> u32;
     }
 
     pub trait Input {
