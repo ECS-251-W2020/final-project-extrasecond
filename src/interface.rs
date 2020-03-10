@@ -32,7 +32,7 @@ pub mod console {
 }
 
 pub mod gpio {
-
+    #[allow(dead_code)]
     pub enum Pud {
         PudOff,
         PudUp,

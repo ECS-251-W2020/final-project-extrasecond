@@ -21,11 +21,8 @@ macro_rules! print {
 
 /// Prints an info, with newline.
 #[macro_export]
-macro_rules! info {
-    ($string:expr) => ({
-        info!("{}", $string);
-    });
-    ($format_string:expr, $($arg:tt)*) => ({
+macro_rules! log {
+    ($log_level:expr, $format_string:expr, $($arg:tt)*) => ({
         #[allow(unused_imports)]
         use crate::interface::time::Timer;
 
@@ -33,7 +30,8 @@ macro_rules! info {
         let timestamp_subsec_us = timestamp.subsec_micros();
 
         $crate::print::_print(format_args_nl!(
-            concat!("[Info {:>3}.{:03}{:03}] ", $format_string),
+            concat!("[{} {:>3}.{:03}{:03}] ", $format_string),
+            $log_level,
             timestamp.as_secs(),
             timestamp_subsec_us / 1_000,
             timestamp_subsec_us % 1_000,
@@ -42,24 +40,24 @@ macro_rules! info {
     })
 }
 
+/// Prints an info, with newline.
+#[macro_export]
+macro_rules! info {
+    ($string:expr) => ({
+        crate::log!("Info", "{}", $string);
+    });
+    ($format_string:expr, $($arg:tt)*) => ({
+        crate::log!("Info", $format_string, $($arg)*);
+    })
+}
+
+/// Prints an warning, with newline.
 #[macro_export]
 macro_rules! warn {
     ($string:expr) => ({
-        warn!("{}", $string);
+        crate::log!("Warn", "{}", $string);
     });
     ($format_string:expr, $($arg:tt)*) => ({
-        #[allow(unused_imports)]
-        use crate::interface::time::Timer;
-
-        let timestamp = $crate::arch::timer().uptime();
-        let timestamp_subsec_us = timestamp.subsec_micros();
-
-        $crate::print::_print(format_args_nl!(
-            concat!("[Warn {:>3}.{:03}{:03}] ", $format_string),
-            timestamp.as_secs(),
-            timestamp_subsec_us / 1_000,
-            timestamp_subsec_us % 1_000,
-            $($arg)*
-        ));
+        crate::log!("Warn", $format_string, $($arg)*);
     })
 }

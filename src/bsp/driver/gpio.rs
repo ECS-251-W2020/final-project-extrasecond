@@ -1,7 +1,7 @@
 use crate::{arch, arch::Mutex, interface};
 use core::ops;
+use register::mmio::{ReadOnly, ReadWrite, WriteOnly};
 use register::{register_bitfields, register_structs};
-use register::mmio::{ReadWrite, ReadOnly, WriteOnly};
 
 register_bitfields! {
     u32,
@@ -35,30 +35,6 @@ register_bitfields! {
             Output = 0b001,
             AltFunc0 = 0b100
         ]
-    ],
-
-    GPCLR0 [
-        CLR2 OFFSET(2) NUMBITS(1) [
-            NoEffect = 0,
-            Clear = 1
-        ],
-
-        CLR1 OFFSET(1) NUMBITS(1) [
-            NoEffect = 0,
-            Clear = 1
-        ],
-
-        CLR0 OFFSET(0) NUMBITS(1) [
-            NoEffect = 0,
-            Clear = 1
-        ]
-    ],
-
-    GPLEV0 [
-        LEV3 OFFSET(3) NUMBITS(1) [],
-        LEV2 OFFSET(2) NUMBITS(1) [],
-        LEV1 OFFSET(1) NUMBITS(1) [],
-        LEV0 OFFSET(0) NUMBITS(1) []
     ]
 }
 
@@ -75,10 +51,10 @@ register_structs! {
         (0x1c => GPSET0: WriteOnly<u32>),
         (0x20 => GPSET1: WriteOnly<u32>),
         (0x24 => _reserved2),
-        (0x28 => GPCLR0: WriteOnly<u32, GPCLR0::Register>),
+        (0x28 => GPCLR0: WriteOnly<u32>),
         (0x2c => GPCLR1: WriteOnly<u32>),
         (0x30 => _reserved3),
-        (0x34 => GPLEV0: ReadOnly<u32, GPLEV0::Register>),
+        (0x34 => GPLEV0: ReadOnly<u32>),
         (0x38 => GPLEV1: ReadOnly<u32>),
         (0x3c => _reserved4),
         (0x94 => GPPUD: ReadWrite<u32>),
@@ -139,8 +115,8 @@ impl GPIO {
     }
 }
 
-use interface::gpio::Pud;
 use interface::gpio::Dir;
+use interface::gpio::Pud;
 
 impl interface::gpio::Set for GPIO {
     fn pullupdn(&self, pin: u32, pud: Pud) {
@@ -172,18 +148,30 @@ impl interface::gpio::Set for GPIO {
         };
         match pin {
             0..10 => {
-                inner.GPFSEL0.set((inner.GPFSEL0.get() & 0xFFFFFFF8_u32.rotate_left(pin * 3)) | (d << (pin * 3)));
-            },
+                inner.GPFSEL0.set(
+                    (inner.GPFSEL0.get() & 0xFFFFFFF8_u32.rotate_left(pin * 3)) | (d << (pin * 3)),
+                );
+            }
             10..20 => {
-                inner.GPFSEL1.set((inner.GPFSEL1.get() & 0xFFFFFFF8_u32.rotate_left((pin - 10) * 3)) | (d << ((pin - 10) * 3)));
-            },
+                inner.GPFSEL1.set(
+                    (inner.GPFSEL1.get() & 0xFFFFFFF8_u32.rotate_left((pin - 10) * 3))
+                        | (d << ((pin - 10) * 3)),
+                );
+            }
             20..28 => {
-                inner.GPFSEL2.set((inner.GPFSEL2.get() & 0xFFFFFFF8_u32.rotate_left((pin - 20) * 3)) | (d << ((pin - 20) * 3)));
-            },
+                inner.GPFSEL2.set(
+                    (inner.GPFSEL2.get() & 0xFFFFFFF8_u32.rotate_left((pin - 20) * 3))
+                        | (d << ((pin - 20) * 3)),
+                );
+            }
             _ => {
                 arch::spin_for_cycles(1);
-            },
+            }
         };
+
+        if direction == Dir::Output {
+            inner.GPCLR0.set(1 << pin);
+        }
     }
 
     fn cleanup(&self) {
@@ -197,13 +185,13 @@ impl interface::gpio::Output for GPIO {
         if value == 0 {
             inner.GPCLR0.set(1 << pin);
         } else {
-            inner.GPSET0.set(1 << pin);   
+            inner.GPSET0.set(1 << pin);
         }
     }
 }
 
 impl interface::gpio::Input for GPIO {
-    fn input(&self, pin: u32) -> u32 {
+    fn input(&self, _pin: u32) -> u32 {
         let inner = &self.inner.lock();
         (inner.GPLEV0.get() as u32 >> pin) & 1
     }

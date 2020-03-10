@@ -1,7 +1,9 @@
-use core::{fmt, panic::PanicInfo};
+use core::{
+    fmt::{self, Write},
+    panic::PanicInfo,
+};
 
 fn _panic_print(args: fmt::Arguments) {
-    use fmt::Write;
     unsafe { crate::bsp::panic_console_out().write_fmt(args).unwrap() };
 }
 
@@ -19,5 +21,5 @@ fn panic(info: &PanicInfo) -> ! {
     } else {
         panic_println!("\nKernel panic!");
     }
-    crate::arch::wait_forever()
+    crate::arch::wait_forever(crate::arch::get_core_id())
 }

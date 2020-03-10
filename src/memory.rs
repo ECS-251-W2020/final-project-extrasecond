@@ -1,5 +1,7 @@
-use core::fmt;
-use core::ops::{Range, RangeInclusive};
+use core::{
+    fmt,
+    ops::{Range, RangeInclusive},
+};
 
 pub unsafe fn zero_volatile<T>(range: Range<*mut T>)
 where

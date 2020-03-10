@@ -6,6 +6,7 @@
 #![feature(exclusive_range_pattern)]
 #![allow(incomplete_features)]
 #![feature(const_generics)]
+#![feature(asm)]
 
 mod arch;
 mod bsp;
@@ -31,17 +32,12 @@ unsafe fn kernel_init() -> ! {
 }
 
 fn kernel_main() -> ! {
-    use crate::interface::console::ConsoleAll;
+    use crate::interface::{
+        console::ConsoleAll,
+        gpio::{Dir, GPIOAll, Pud},
+        time::Timer,
+    };
     use core::time::Duration;
-    use interface::gpio::GPIOAll;
-    use interface::time::Timer;
-
-    info!("Hit ENTER to continue...");
-    loop {
-        if bsp::console().read_char() == '\n' {
-            break;
-        }
-    }
 
     info!("Booting on: {}", bsp::board_name());
 
@@ -62,13 +58,18 @@ fn kernel_main() -> ! {
     for (i, driver) in bsp::device_drivers().iter().enumerate() {
         info!("      {}. {}", i + 1, driver.compatible());
     }
-    
 
-    bsp::gpio().setup(17, interface::gpio::Dir::Output, interface::gpio::Pud::PudOff);
-    
-    info!("{:b}", bsp::gpio().input(0));
-    bsp::gpio().setup(2, interface::gpio::Dir::Input, interface::gpio::Pud::PudOff);
-    info!("{:b}", bsp::gpio().input(0));
+    info!("Hit ENTER to continue...");
+    loop {
+        if bsp::console().read_char() == '\n' {
+            break;
+        }
+    }
+
+    bsp::gpio().setup(17, Dir::Output, Pud::PudOff);
+    info!("{:032b}", bsp::gpio().input(0));
+    bsp::gpio().setup(2, Dir::Input, Pud::PudOff);
+    info!("{:032b}", bsp::gpio().input(0));
     let mut i = 0;
     loop {
         if i % 2 == 0 {
@@ -76,7 +77,10 @@ fn kernel_main() -> ! {
         } else {
             bsp::gpio().output(17, 0);
         }
-        info!("Spinning for 1 second");
+        info!("Spinning for 1 second, sending an event");
+        unsafe {
+            asm!("sev");
+        }
         arch::timer().spin_for(Duration::from_secs(1));
         i += 1;
     }

@@ -8,20 +8,7 @@ use cortex_a::{asm, regs::*};
 
 #[no_mangle]
 pub unsafe extern "C" fn _start() -> ! {
-    const CORE_MASK: u64 = 0x3; // The last two bits for 4 cores
-
-    if (bsp::BOOT_CORE_ID == MPIDR_EL1.get() & CORE_MASK)
-        && (CurrentEL.get() == CurrentEL::EL::EL2.value)
-    {
-        // Boot on EL2
-        // SP.set(bsp::BOOT_CORE_STACK_START);
-        // crate::runtime_init::runtime_init()
-
-        // Boot on EL1
-        el2_to_el1_transition()
-    } else {
-        wait_forever();
-    }
+    el2_to_el1_transition()
 }
 
 #[inline(always)]
@@ -57,10 +44,12 @@ unsafe fn el2_to_el1_transition() -> ! {
     asm::eret()
 }
 
+use crate::println;
 #[inline(always)]
-pub fn wait_forever() -> ! {
+pub fn wait_forever(core_id: u64) -> ! {
     loop {
-        asm::wfe()
+        asm::wfe();
+        println!("Core {}: Got event!", core_id);
     }
 }
 
@@ -77,6 +66,11 @@ pub fn timer() -> &'static impl interface::time::Timer {
     &TIMER
 }
 
+#[inline(always)]
+pub fn get_core_id() -> u64 {
+    const CORE_MASK: u64 = 0x3; // The last two bits for 4 cores
+    MPIDR_EL1.get() & CORE_MASK
+}
 /// Information about the HW state.
 pub mod state {
     use crate::arch::PrivilegeLevel;

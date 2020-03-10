@@ -6,9 +6,13 @@ use crate::interface;
 use crate::memory::KernelVirtualLayout;
 use core::fmt;
 
-pub const BOOT_CORE_ID: u64 = 0;
-pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
+pub const CORE_0_ID: u64 = 0;
+//pub const CORE_1_ID: u64 = 1;
+//pub const CORE_2_ID: u64 = 2;
+//pub const CORE_3_ID: u64 = 3;
 
+pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
+// pub const CORE_1_STACK_START: u64 = 0x100_000;
 /*
 /// The address on which the RPi3 firmware loads every binary by default.
 pub const BOARD_DEFAULT_LOAD_ADDRESS: usize = 0x80_000;
