@@ -32,17 +32,22 @@ pub mod console {
 }
 
 pub mod gpio {
-
+    #[allow(dead_code)]
     pub enum Pud {
         PudOff,
         PudUp,
         PudDown,
     }
 
+    pub enum Dir {
+        Input,
+        Output,
+    }
+
     pub trait Set {
         fn pullupdn(&self, pin: u32, pud: Pud);
 
-        fn setup(&self, pin: u32, direction: u32, pud: Pud);
+        fn setup(&self, pin: u32, direction: Dir, pud: Pud);
 
         fn cleanup(&self);
     }

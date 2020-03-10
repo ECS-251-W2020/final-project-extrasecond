@@ -36,6 +36,7 @@ fn kernel_main() -> ! {
     use core::time::Duration;
     use interface::gpio::GPIOAll;
     use interface::time::Timer;
+    use crate::interface::gpio::{Dir, Pud};
 
     info!("Booting on: {}", bsp::board_name());
 
@@ -64,18 +65,21 @@ fn kernel_main() -> ! {
         }
     }
 
-
-    bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
-    bsp::gpio().output(0, 1);
-    bsp::gpio().input(1);
-
-    bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
-    bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
-
+    bsp::gpio().setup(17, Dir::Output, Pud::PudOff);    
+    info!("{:032b}", bsp::gpio().input(0));
+    bsp::gpio().setup(2, Dir::Input, Pud::PudOff);
+    info!("{:032b}", bsp::gpio().input(0));
+    let mut i = 0;
     loop {
+        if i % 2 == 0 {
+            bsp::gpio().output(17, 1);
+        } else {
+            bsp::gpio().output(17, 0);
+        }
         info!("Spinning for 1 second, sending an event");
-        arch::timer().spin_for(Duration::from_secs(1));
         unsafe { asm!("sev"); }
+        arch::timer().spin_for(Duration::from_secs(1));
+        i += 1;
     }
 
     /*    info!("Echoing input now");
