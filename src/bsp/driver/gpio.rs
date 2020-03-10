@@ -111,7 +111,7 @@ impl GPIO {
 
         arch::spin_for_cycles(150);
 
-        //inner.GPPUDCLK0.set(0);
+        inner.GPPUDCLK0.set(0);
     }
 }
 
@@ -180,7 +180,7 @@ impl interface::gpio::Set for GPIO {
     }
 }
 impl interface::gpio::Output for GPIO {
-    fn output(&self, pin: u32, value: u32) -> u32 {
+    fn output(&self, pin: u32, value: u32) {
         let inner = &self.inner.lock();
         if value == 0 {
             inner.GPCLR0.set(1 << pin);
