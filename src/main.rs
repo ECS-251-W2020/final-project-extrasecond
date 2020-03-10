@@ -36,13 +36,6 @@ fn kernel_main() -> ! {
     use interface::gpio::GPIOAll;
     use interface::time::Timer;
 
-    info!("Hit ENTER to continue...");
-    loop {
-        if bsp::console().read_char() == '\n' {
-            break;
-        }
-    }
-
     info!("Booting on: {}", bsp::board_name());
 
     info!("{}", bsp::virt_mem_layout());
@@ -63,12 +56,13 @@ fn kernel_main() -> ! {
         info!("      {}. {}", i + 1, driver.compatible());
     }
 
-    bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
-    bsp::gpio().output(0, 1);
-    bsp::gpio().input(1);
+    info!("Hit ENTER to continue...");
+    loop {
+        if bsp::console().read_char() == '\n' {
+            break;
+        }
+    }
 
-    bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
-    bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
 
     bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
     bsp::gpio().output(0, 1);
