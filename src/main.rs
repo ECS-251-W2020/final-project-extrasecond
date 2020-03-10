@@ -62,17 +62,23 @@ fn kernel_main() -> ! {
     for (i, driver) in bsp::device_drivers().iter().enumerate() {
         info!("      {}. {}", i + 1, driver.compatible());
     }
+    
 
-    bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
-    bsp::gpio().output(0, 1);
-    bsp::gpio().input(1);
-
-    bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);
-    bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
-
+    bsp::gpio().setup(17, interface::gpio::Dir::Output, interface::gpio::Pud::PudOff);
+    
+    info!("{:b}", bsp::gpio().input(0));
+    bsp::gpio().setup(2, interface::gpio::Dir::Input, interface::gpio::Pud::PudOff);
+    info!("{:b}", bsp::gpio().input(0));
+    let mut i = 0;
     loop {
+        if i % 2 == 0 {
+            bsp::gpio().output(17, 1);
+        } else {
+            bsp::gpio().output(17, 0);
+        }
         info!("Spinning for 1 second");
         arch::timer().spin_for(Duration::from_secs(1));
+        i += 1;
     }
 
     /*    info!("Echoing input now");
