@@ -64,7 +64,7 @@ fn kernel_main() -> ! {
     }
 
     bsp::gpio().setup(0, 1, interface::gpio::Pud::PudOff);
-    bsp::gpio().output(0, 1);
+    info!(bsp::gpio().output(0, 1));
     info!(bsp::gpio().input(1));
 
     bsp::gpio().setup(1, 1, interface::gpio::Pud::PudUp);

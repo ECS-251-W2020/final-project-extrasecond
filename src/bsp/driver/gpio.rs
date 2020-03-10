@@ -5,6 +5,20 @@ use register::{mmio::ReadWrite, register_bitfields, register_structs};
 register_bitfields! {
     u32,
 
+    GPSET0 [
+        SET0 OFFSET(0) NUMBITS(1) [
+            NoEffect = 0,
+            Set = 1
+        ]
+    ],
+
+    GPFSEL0 [
+        FSEL0 OFFSET(0) NUMBITS(3) [
+            Input = 0b000,
+            Output = 0b001
+        ]
+    ],
+
     GPFSEL1 [
         FSEL15 OFFSET(15) NUMBITS(3) [
             Input = 0b000,
@@ -23,14 +37,14 @@ register_bitfields! {
 register_structs! {
     #[allow(non_snake_case)]
     RegisterBlock {
-        (0x00 => GPFSEL0: ReadWrite<u32>),
+        (0x00 => GPFSEL0: ReadWrite<u32, GPFSEL0::Register>),
         (0x04 => GPFSEL1: ReadWrite<u32, GPFSEL1::Register>),
         (0x08 => GPFSEL2: ReadWrite<u32>),
         (0x0C => GPFSEL3: ReadWrite<u32>),
         (0x10 => GPFSEL4: ReadWrite<u32>),
         (0x14 => GPFSEL5: ReadWrite<u32>),
         (0x18 => _reserved1),
-        (0x1c => GPSET0: ReadWrite<u32>),
+        (0x1c => GPSET0: ReadWrite<u32, GPSET0::Register>),
         (0x20 => GPSET1: ReadWrite<u32>),
         (0x24 => _reserved2),
         (0x28 => GPCLR0: ReadWrite<u32>),
@@ -93,7 +107,7 @@ impl GPIO {
 
         arch::spin_for_cycles(150);
 
-        inner.GPPUDCLK0.set(0);
+        //inner.GPPUDCLK0.set(0);
     }
 }
 
@@ -124,7 +138,10 @@ impl interface::gpio::Set for GPIO {
 
         let inner = &self.inner.lock();
         match pin {
-            0..10 => {
+            0 => {
+                inner.GPFSEL0.modify(GPFSEL0::FSEL0::Output);
+            }
+            1..10 => {
                 let modified = (inner.GPFSEL0.get() as u32) | (direction << (pin * 3));
                 inner.GPFSEL0.set(modified);
             }
@@ -147,14 +164,24 @@ impl interface::gpio::Set for GPIO {
     }
 }
 impl interface::gpio::Output for GPIO {
-    fn output(&self, pin: u32, value: u32){
+    fn output(&self, pin: u32, value: u32) -> u32 {
         let inner = &self.inner.lock();
         if value == 1 {
-            let modified = (inner.GPSET0.get() as u32) | (1 << pin);
-            inner.GPSET0.set(modified);
+            match pin {
+                0 => {
+                    inner.GPSET0.modify(GPSET0::SET0::Set);
+                    inner.GPSET0.get()
+                }
+                _ => {
+                    let modified = (inner.GPSET0.get() as u32) | (1 << pin);
+                    inner.GPSET0.set(modified);
+                    inner.GPSET0.get()
+                }
+            }
         } else {
             let modified = (inner.GPCLR0.get() as u32) | (1 << pin);
             inner.GPCLR0.set(modified);
+            inner.GPCLR0.get()
         }
     }
 }
@@ -162,7 +189,8 @@ impl interface::gpio::Output for GPIO {
 impl interface::gpio::Input for GPIO {
     fn input(&self, pin: u32) -> u32 {
         let inner = &self.inner.lock();
-        (inner.GPLEV1.get() as u32 >> pin) & 1
+        // (inner.GPLEV1.get() as u32 >> pin) & 1
+        inner.GPPUDCLK0.get() + pin
     }
 }
 
