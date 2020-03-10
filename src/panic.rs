@@ -19,5 +19,5 @@ fn panic(info: &PanicInfo) -> ! {
     } else {
         panic_println!("\nKernel panic!");
     }
-    crate::arch::wait_forever()
+    crate::arch::wait_forever(crate::arch::get_core_id())
 }

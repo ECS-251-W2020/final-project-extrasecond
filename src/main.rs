@@ -6,6 +6,7 @@
 #![feature(exclusive_range_pattern)]
 #![allow(incomplete_features)]
 #![feature(const_generics)]
+#![feature(asm)]
 
 mod arch;
 mod bsp;
@@ -72,8 +73,9 @@ fn kernel_main() -> ! {
     bsp::gpio().setup(2, 1, interface::gpio::Pud::PudDown);
 
     loop {
-        info!("Spinning for 1 second");
+        info!("Spinning for 1 second, sending an event");
         arch::timer().spin_for(Duration::from_secs(1));
+        unsafe { asm!("sev"); }
     }
 
     /*    info!("Echoing input now");
