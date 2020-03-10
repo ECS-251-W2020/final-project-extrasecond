@@ -18,16 +18,16 @@ unsafe fn zero_bss() {
     memory::zero_volatile(bss_range());
 }
 
-use crate::bsp::*;
 use crate::arch::{get_core_id, wait_forever};
+use crate::bsp::*;
 
 pub unsafe fn runtime_init() -> ! {
-    let core_id = get_core_id();   
+    let core_id = get_core_id();
     if CORE_0_ID == core_id {
         zero_bss();
 
         crate::kernel_init()
-    } 
+    }
     // Should not got here, but just in case.
     wait_forever(core_id)
 }

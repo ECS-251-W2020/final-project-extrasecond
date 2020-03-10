@@ -1,7 +1,7 @@
 use crate::{arch, arch::Mutex, interface};
 use core::ops;
+use register::mmio::{ReadOnly, ReadWrite, WriteOnly};
 use register::{register_bitfields, register_structs};
-use register::mmio::{ReadWrite, ReadOnly, WriteOnly};
 
 register_bitfields! {
     u32,
@@ -139,8 +139,8 @@ impl GPIO {
     }
 }
 
-use interface::gpio::Pud;
 use interface::gpio::Dir;
+use interface::gpio::Pud;
 
 impl interface::gpio::Set for GPIO {
     fn pullupdn(&self, pin: u32, pud: Pud) {
@@ -172,17 +172,25 @@ impl interface::gpio::Set for GPIO {
         };
         match pin {
             0..10 => {
-                inner.GPFSEL0.set((inner.GPFSEL0.get() & 0xFFFFFFF8_u32.rotate_left(pin * 3)) | (d << (pin * 3)));
-            },
+                inner.GPFSEL0.set(
+                    (inner.GPFSEL0.get() & 0xFFFFFFF8_u32.rotate_left(pin * 3)) | (d << (pin * 3)),
+                );
+            }
             10..20 => {
-                inner.GPFSEL1.set((inner.GPFSEL1.get() & 0xFFFFFFF8_u32.rotate_left((pin - 10) * 3)) | (d << ((pin - 10) * 3)));
-            },
+                inner.GPFSEL1.set(
+                    (inner.GPFSEL1.get() & 0xFFFFFFF8_u32.rotate_left((pin - 10) * 3))
+                        | (d << ((pin - 10) * 3)),
+                );
+            }
             20..28 => {
-                inner.GPFSEL2.set((inner.GPFSEL2.get() & 0xFFFFFFF8_u32.rotate_left((pin - 20) * 3)) | (d << ((pin - 20) * 3)));
-            },
+                inner.GPFSEL2.set(
+                    (inner.GPFSEL2.get() & 0xFFFFFFF8_u32.rotate_left((pin - 20) * 3))
+                        | (d << ((pin - 20) * 3)),
+                );
+            }
             _ => {
                 arch::spin_for_cycles(1);
-            },
+            }
         };
     }
 
@@ -197,7 +205,7 @@ impl interface::gpio::Output for GPIO {
         if value == 0 {
             inner.GPCLR0.set(1 << pin);
         } else {
-            inner.GPSET0.set(1 << pin);   
+            inner.GPSET0.set(1 << pin);
         }
     }
 }

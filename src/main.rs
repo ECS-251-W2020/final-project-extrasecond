@@ -32,11 +32,12 @@ unsafe fn kernel_init() -> ! {
 }
 
 fn kernel_main() -> ! {
-    use crate::interface::console::ConsoleAll;
+    use crate::interface::{
+        console::ConsoleAll,
+        gpio::{Dir, GPIOAll, Pud},
+        time::Timer,
+    };
     use core::time::Duration;
-    use interface::gpio::GPIOAll;
-    use interface::time::Timer;
-    use crate::interface::gpio::{Dir, Pud};
 
     info!("Booting on: {}", bsp::board_name());
 
@@ -65,7 +66,7 @@ fn kernel_main() -> ! {
         }
     }
 
-    bsp::gpio().setup(17, Dir::Output, Pud::PudOff);    
+    bsp::gpio().setup(17, Dir::Output, Pud::PudOff);
     info!("{:032b}", bsp::gpio().input(0));
     bsp::gpio().setup(2, Dir::Input, Pud::PudOff);
     info!("{:032b}", bsp::gpio().input(0));
@@ -77,7 +78,9 @@ fn kernel_main() -> ! {
             bsp::gpio().output(17, 0);
         }
         info!("Spinning for 1 second, sending an event");
-        unsafe { asm!("sev"); }
+        unsafe {
+            asm!("sev");
+        }
         arch::timer().spin_for(Duration::from_secs(1));
         i += 1;
     }
