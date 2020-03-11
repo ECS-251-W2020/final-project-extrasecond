@@ -1,9 +1,9 @@
+use crate::bsp::driver::clock::Clock;
 use crate::{arch, arch::Mutex, interface, interface::time::Timer};
-use core::time::Duration;
 use core::ops;
+use core::time::Duration;
 use register::mmio::ReadWrite;
 use register::{register_bitfields, register_structs};
-use crate::bsp::driver::clock::Clock;
 
 register_bitfields! {
     u32,
@@ -127,7 +127,6 @@ register_structs! {
     }
 }
 
-
 struct PWMInner {
     base_addr: usize,
 }
@@ -150,7 +149,6 @@ impl PWMInner {
     }
 }
 
-
 pub struct PWM {
     inner: Mutex<PWMInner>,
     clock: Clock,
@@ -163,21 +161,25 @@ impl PWM {
             inner: Mutex::new(PWMInner::new(base_addr)),
             clock: Clock::new(clock_base_addr),
             gpio_to_pwm_port: [
-                0,          0,          0,          0,          0,          0,          0,          0,	//  0 ->  7
-                0,          0,          0,          0,          1,          2,          0,          0, 	//  8 -> 15
-                0,          0,          1,          2,          0,          0,          0,          0, 	// 16 -> 23
-                0,          0,          0,          0	                                                // 24 -> 28
-            ]
+                0, 0, 0, 0, 0, 0, 0, 0, //  0 ->  7
+                0, 0, 0, 0, 1, 2, 0, 0, //  8 -> 15
+                0, 0, 1, 2, 0, 0, 0, 0, // 16 -> 23
+                0, 0, 0, 0, // 24 -> 28
+            ],
         }
     }
 }
 
 impl interface::pwm::Set for PWM {
-
     fn set_mode(&self, mode: u32) {
         let inner = &self.inner.lock();
         if mode == 0 {
-            inner.CTL.modify(CTL::PWEN1::Enabled + CTL::PWEN2::Enabled + CTL::MSEN1::MSTransmission + CTL::MSEN2::MSTransmission);
+            inner.CTL.modify(
+                CTL::PWEN1::Enabled
+                    + CTL::PWEN2::Enabled
+                    + CTL::MSEN1::MSTransmission
+                    + CTL::MSEN2::MSTransmission,
+            );
         } else {
             inner.CTL.modify(CTL::PWEN1::Enabled + CTL::PWEN2::Enabled);
         }
@@ -196,7 +198,7 @@ impl interface::pwm::Set for PWM {
         let inner = &self.inner.lock();
         let pwm_control = inner.CTL.get() as u32;
         inner.CTL.set(0);
-        
+
         &self.clock.init(divisor & 0x0FFF);
         inner.CTL.set(pwm_control);
     }
@@ -213,4 +215,3 @@ impl interface::pwm::Output for PWM {
         };
     }
 }
-

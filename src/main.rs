@@ -36,10 +36,10 @@ fn kernel_main() -> ! {
         gpio::{Dir, Pud},
         time::Timer,
     };
-    use interface::gpio::All as GPIOAll;
-    use interface::console::All as ConsoleAll;
-    use interface::pwm::All as PWMAll;
     use core::time::Duration;
+    use interface::console::All as ConsoleAll;
+    use interface::gpio::All as GPIOAll;
+    use interface::pwm::All as PWMAll;
 
     info!("Booting on: {}", bsp::board_name());
 

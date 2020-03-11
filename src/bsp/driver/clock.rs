@@ -1,6 +1,6 @@
 use crate::{arch, arch::Mutex, interface::time::Timer};
-use core::time::Duration;
 use core::ops;
+use core::time::Duration;
 use register::mmio::ReadWrite;
 use register::register_structs;
 

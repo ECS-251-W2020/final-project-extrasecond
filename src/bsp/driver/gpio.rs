@@ -1,9 +1,8 @@
-use crate::{arch, arch::Mutex, bsp, interface, interface::time::Timer};
 use crate::interface::pwm::All as PWMAll;
+use crate::{arch, arch::Mutex, bsp, interface, interface::time::Timer};
 use core::{ops, time::Duration};
 use register::mmio::{ReadOnly, ReadWrite, WriteOnly};
 use register::{register_bitfields, register_structs};
-
 
 register_bitfields! {
     u32,
