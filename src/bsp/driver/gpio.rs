@@ -176,22 +176,22 @@ impl interface::gpio::Set for GPIO {
                 inner.GPFSEL0.set(
                     (inner.GPFSEL0.get() & 0xFFFFFFF8_u32.rotate_left(pin * 3)) | (d << (pin * 3)),
                 );
-            },
+            }
             10..20 => {
                 inner.GPFSEL1.set(
                     (inner.GPFSEL1.get() & 0xFFFFFFF8_u32.rotate_left((pin - 10) * 3))
                         | (d << ((pin - 10) * 3)),
                 );
-            },
+            }
             20..28 => {
                 inner.GPFSEL2.set(
                     (inner.GPFSEL2.get() & 0xFFFFFFF8_u32.rotate_left((pin - 20) * 3))
                         | (d << ((pin - 20) * 3)),
                 );
-            },
+            }
             _ => {
                 arch::spin_for_cycles(1);
-            },
+            }
         };
 
         inner.GPCLR0.set(1 << pin);

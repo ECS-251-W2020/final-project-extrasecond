@@ -66,7 +66,7 @@ fn kernel_main() -> ! {
     for (i, driver) in bsp::device_drivers().iter().enumerate() {
         info!("      {}. {}", i + 1, driver.compatible());
     }
-    
+
     // Wake up slave cores.
     activate_other_cores();
 
