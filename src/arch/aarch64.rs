@@ -8,11 +8,22 @@ use cortex_a::{asm, regs::*};
 
 #[no_mangle]
 pub unsafe extern "C" fn _start() -> ! {
-    el2_to_el1_transition()
+    use crate::runtime_init::{master_core_init, other_cores_init};
+    match get_core_id() {
+        // Core 0: Master core
+        0b00 => el2_to_el1_transition(master_core_init as *const () as u64, bsp::BOOT_CORE_STACK_START),
+
+        // Core 1-3: Slave core
+        0b01 | 0b10 | 0b11 => el2_to_el1_transition(other_cores_init as *const () as u64, (0b1011_00 | get_core_id()) << bsp::SLAVE_CORE_STACK_SHIFT),
+
+        // Should not happen
+        _ => wait_forever(get_core_id())
+    }
+    
 }
 
 #[inline(always)]
-unsafe fn el2_to_el1_transition() -> ! {
+unsafe fn el2_to_el1_transition(next_func_addr: u64, stack_start_addr: u64) -> ! {
     // Enable timer counter registers for EL1.
     CNTHCTL_EL2.write(CNTHCTL_EL2::EL1PCEN::SET + CNTHCTL_EL2::EL1PCTEN::SET);
 
@@ -35,21 +46,19 @@ unsafe fn el2_to_el1_transition() -> ! {
     );
 
     // Second, let the link register point to init().
-    ELR_EL2.set(crate::runtime_init::runtime_init as *const () as u64);
+    ELR_EL2.set(next_func_addr);
 
     // Set up SP_EL1 (stack pointer), which will be used by EL1 once we "return" to it.
-    SP_EL1.set(bsp::BOOT_CORE_STACK_START);
+    SP_EL1.set(stack_start_addr);
 
     // Use `eret` to "return" to EL1. This will result in execution of `reset()` in EL1.
     asm::eret()
 }
 
-use crate::println;
 #[inline(always)]
 pub fn wait_forever(core_id: u64) -> ! {
     loop {
         asm::wfe();
-        println!("Core {}: Got event!", core_id);
     }
 }
 

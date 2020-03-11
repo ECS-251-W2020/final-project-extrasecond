@@ -11,7 +11,7 @@ LINKER_FILE       = src/bsp/rpi/link.ld
 RUSTC_MISC_ARGS   = -C target-cpu=cortex-a53 -C relocation-model=pic
 
 RUSTFLAGS          = -C link-arg=-T$(LINKER_FILE) $(RUSTC_MISC_ARGS)
-RUSTFLAGS_PEDANTIC = $(RUSTFLAGS) -D warnings
+RUSTFLAGS_PEDANTIC = $(RUSTFLAGS)
 
 SOURCES = $(wildcard **/*.rs) $(wildcard **/*.S) $(wildcard **/*.ld)
 

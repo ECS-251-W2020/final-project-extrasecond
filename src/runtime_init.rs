@@ -19,15 +19,14 @@ unsafe fn zero_bss() {
 }
 
 use crate::arch::{get_core_id, wait_forever};
-use crate::bsp::*;
+use crate::info; 
+pub unsafe fn master_core_init() -> ! {
+    zero_bss();
 
-pub unsafe fn runtime_init() -> ! {
-    let core_id = get_core_id();
-    if CORE_0_ID == core_id {
-        zero_bss();
+    crate::kernel_init()
+}
 
-        crate::kernel_init()
-    }
-    // Should not got here, but just in case.
-    wait_forever(core_id)
+pub unsafe fn other_cores_init() -> !{
+    info!("Core {} woke up: Hello world", get_core_id());
+    wait_forever(get_core_id())
 }

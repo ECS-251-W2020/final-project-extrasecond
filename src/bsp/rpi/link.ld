@@ -35,5 +35,30 @@ SECTIONS
         __bss_end = .;
     }
 
+    . = 0xD4000;
+    .stack_core1 :
+    {
+        __stack_start__ = .;
+        . = . + 16384;
+        __stack_end__ = .;
+    }
+
+    . = 0xD8000;
+    .stack_core2 :
+    {
+        __stack_start__ = .;
+        . = . + 16384;
+        __stack_end__ = .;
+    }
+
+    . = 0xDC000;
+    .stack_core3 :
+    {
+        __stack_start__ = .;
+        . = . + 16384;
+        __stack_end__ = .;
+    }
+    . = ALIGN(65536); /* Fill up to 64 KiB */
+
     /DISCARD/ : { *(.comment*) }
 }

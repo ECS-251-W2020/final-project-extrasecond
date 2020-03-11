@@ -7,12 +7,25 @@ use crate::memory::KernelVirtualLayout;
 use core::fmt;
 
 pub const CORE_0_ID: u64 = 0;
-//pub const CORE_1_ID: u64 = 1;
-//pub const CORE_2_ID: u64 = 2;
-//pub const CORE_3_ID: u64 = 3;
+pub const CORE_1_ID: u64 = 1;
+pub const CORE_2_ID: u64 = 2;
+pub const CORE_3_ID: u64 = 3;
+
+// When these addresses are non-zero, corresponding 
+// core will use the non-zero value as an address and 
+// jump to there, otherwise it is wfe. This is how we 
+// wake up cores by giving it an function entry.
+pub const MASTER_CORE_WAKEUP_ADDR: u64 = 0xd8;
+pub const SLAVE_CORES_WAKEUP_ADDR: [u64; 3] = [0xe0, 0xe8, 0xf0];
 
 pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
-// pub const CORE_1_STACK_START: u64 = 0x100_000;
+
+// 8k stack for slave cores
+pub const SLAVE_CORE_STACK_SHIFT: u64 = 14;
+pub const CORE_1_STACK_START: u64 = 0x0D4_000; // 0b1011_01_00_0000_...
+pub const CORE_2_STACK_START: u64 = 0x0D8_000; // 0b1011_10_00_0000_...
+pub const CORE_3_STACK_START: u64 = 0x0DB_000; // 0b1011_11_00_0000_...
+
 /*
 /// The address on which the RPi3 firmware loads every binary by default.
 pub const BOARD_DEFAULT_LOAD_ADDRESS: usize = 0x80_000;

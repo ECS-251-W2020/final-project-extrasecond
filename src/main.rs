@@ -7,6 +7,7 @@
 #![allow(incomplete_features)]
 #![feature(const_generics)]
 #![feature(asm)]
+#![feature(global_asm)]
 
 mod arch;
 mod bsp;
@@ -66,10 +67,15 @@ fn kernel_main() -> ! {
         }
     }
 
+    // Wake up core 1.
+    if arch::get_core_id() == bsp::CORE_0_ID{
+        activate_other_cores();
+    }
+
     bsp::gpio().setup(17, Dir::Output, Pud::PudOff);
-    info!("{:032b}", bsp::gpio().input(0));
+    //info!("0x{:08x}", bsp::gpio().input(0));
     bsp::gpio().setup(2, Dir::Input, Pud::PudOff);
-    info!("{:032b}", bsp::gpio().input(0));
+    //info!("0x{:08x}", bsp::gpio().input(0));
     let mut i = 0;
     loop {
         if i % 2 == 0 {
@@ -77,18 +83,21 @@ fn kernel_main() -> ! {
         } else {
             bsp::gpio().output(17, 0);
         }
-        info!("Spinning for 1 second, sending an event");
-        unsafe {
-            asm!("sev");
-        }
+        info!("Spinning for 1 second");
+  
         arch::timer().spin_for(Duration::from_secs(1));
         i += 1;
     }
+}
 
-    /*    info!("Echoing input now");
-
-    loop {
-        let c = bsp::console().read_char();
-        bsp::console().write_char(c);
-    }*/
+fn activate_other_cores() {
+    use bsp::*;
+    SLAVE_CORES_WAKEUP_ADDR.iter().enumerate().for_each(|(i, &addr)| {
+        info!("Writing to 0x{:08x} to activate core {}...", addr, i);
+        unsafe {
+            let dest: *mut u64 = addr as *mut u64;
+            *dest = arch::_start as *const () as u64;
+            asm!("sev");
+        }
+    });
 }
