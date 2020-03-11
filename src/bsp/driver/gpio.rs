@@ -1,9 +1,8 @@
-use crate::{arch, arch::Mutex, interface};
-use core::ops;
-use register::{
-    mmio::{ReadOnly, ReadWrite, WriteOnly},
-    register_bitfields, register_structs,
-};
+use crate::interface::pwm::All as PWMAll;
+use crate::{arch, arch::Mutex, bsp, interface, interface::time::Timer};
+use core::{ops, time::Duration};
+use register::mmio::{ReadOnly, ReadWrite, WriteOnly};
+use register::{register_bitfields, register_structs};
 
 register_bitfields! {
     u32,
@@ -26,6 +25,18 @@ register_bitfields! {
     ],
 
     GPFSEL1 [
+        FSEL19 OFFSET(27) NUMBITS(3) [
+            Input = 0b000,
+            Output = 0b001,
+            AltFunc5 = 0b010
+        ],
+
+        FSEL18 OFFSET(24) NUMBITS(3) [
+            Input = 0b000,
+            Output = 0b001,
+            AltFunc5 = 0b010
+        ],
+
         FSEL15 OFFSET(15) NUMBITS(3) [
             Input = 0b000,
             Output = 0b001,
@@ -36,6 +47,18 @@ register_bitfields! {
             Input = 0b000,
             Output = 0b001,
             AltFunc0 = 0b100
+        ],
+
+        FSEL13 OFFSET(9) NUMBITS(3) [
+            Input = 0b000,
+            Output = 0b001,
+            AltFunc0 = 0b100 // PWM Channel 0
+        ],
+
+        FSEL12 OFFSET(6) NUMBITS(3) [
+            Input = 0b000,
+            Output = 0b001,
+            AltFunc0 = 0b100 // PWM Channel 0
         ]
     ],
 
@@ -193,8 +216,26 @@ impl interface::gpio::Set for GPIO {
                 arch::spin_for_cycles(1);
             }
         };
-
         inner.GPCLR0.set(1 << pin);
+    }
+
+    fn setup_pwm(&self, pin: u32) {
+        let inner = &self.inner.lock();
+        if pin == 12 {
+            inner.GPFSEL1.modify(GPFSEL1::FSEL12::AltFunc0);
+        } else if pin == 13 {
+            inner.GPFSEL1.modify(GPFSEL1::FSEL13::AltFunc0);
+        } else if pin == 18 {
+            inner.GPFSEL1.modify(GPFSEL1::FSEL18::AltFunc5);
+        } else if pin == 19 {
+            inner.GPFSEL1.modify(GPFSEL1::FSEL19::AltFunc5);
+        } else {
+            return;
+        }
+        arch::timer().spin_for(Duration::from_secs_f32(0.11));
+        bsp::pwm().set_mode(1);
+        bsp::pwm().set_range(1024);
+        bsp::pwm().set_clock(32);
     }
 
     fn cleanup(&self) {
@@ -216,7 +257,7 @@ impl interface::gpio::Output for GPIO {
 impl interface::gpio::Input for GPIO {
     fn input(&self, pin: u32) -> u32 {
         let inner = &self.inner.lock();
-        (inner.GPLEV0.get() as u32 >> pin) & 1
+        ((inner.GPLEV0.get() as u32) >> pin) & 1
     }
 }
 

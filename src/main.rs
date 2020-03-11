@@ -34,11 +34,13 @@ unsafe fn kernel_init() -> ! {
 
 fn kernel_main() -> ! {
     use crate::interface::{
-        console::ConsoleAll,
-        gpio::{Dir, GPIOAll, Pud},
+        gpio::{Dir, Pud},
         time::Timer,
     };
     use core::time::Duration;
+    use interface::console::All as ConsoleAll;
+    use interface::gpio::All as GPIOAll;
+    use interface::pwm::All as PWMAll;
 
     info!("Hit ENTER to continue...");
     loop {
@@ -71,9 +73,12 @@ fn kernel_main() -> ! {
     activate_other_cores();
 
     bsp::gpio().setup(17, Dir::Output, Pud::PudOff);
-    //info!("0x{:08x}", bsp::gpio().input(0));
     bsp::gpio().setup(2, Dir::Input, Pud::PudOff);
-    //info!("0x{:08x}", bsp::gpio().input(0));
+    info!("{:032b}", bsp::gpio().input(0));
+
+    bsp::gpio().setup_pwm(12);
+    bsp::pwm().write(12, 100);
+
     let mut i = 0;
     loop {
         if i % 2 == 0 {
