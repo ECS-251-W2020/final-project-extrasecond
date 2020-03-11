@@ -15,9 +15,9 @@ pub const CORE_2_ID: u64 = 2;
 #[allow(dead_code)]
 pub const CORE_3_ID: u64 = 3;
 
-// When these addresses are non-zero, corresponding 
-// core will use the non-zero value as an address and 
-// jump to there, otherwise it is wfe. This is how we 
+// When these addresses are non-zero, corresponding
+// core will use the non-zero value as an address and
+// jump to there, otherwise it is wfe. This is how we
 // wake up cores by giving it an function entry.
 #[allow(dead_code)]
 pub const MASTER_CORE_WAKEUP_ADDR: u64 = 0xd8;

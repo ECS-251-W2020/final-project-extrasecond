@@ -11,15 +11,20 @@ pub unsafe extern "C" fn _start() -> ! {
     use crate::runtime_init::{master_core_init, other_cores_init};
     match get_core_id() {
         // Core 0: Master core
-        0b00 => el2_to_el1_transition(master_core_init as *const () as u64, bsp::BOOT_CORE_STACK_START),
+        0b00 => el2_to_el1_transition(
+            master_core_init as *const () as u64,
+            bsp::BOOT_CORE_STACK_START,
+        ),
 
         // Core 1-3: Slave core
-        0b01 | 0b10 | 0b11 => el2_to_el1_transition(other_cores_init as *const () as u64, (bsp::SLAVE_STACK_PREAMBLE | get_core_id()) << bsp::SLAVE_STACK_SHIFT),
+        0b01 | 0b10 | 0b11 => el2_to_el1_transition(
+            other_cores_init as *const () as u64,
+            (bsp::SLAVE_STACK_PREAMBLE | get_core_id()) << bsp::SLAVE_STACK_SHIFT,
+        ),
 
         // Should not happen
-        _ => wait_forever(get_core_id())
+        _ => wait_forever(get_core_id()),
     }
-    
 }
 
 #[inline(always)]
