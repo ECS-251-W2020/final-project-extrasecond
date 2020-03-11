@@ -35,30 +35,6 @@ register_bitfields! {
             Output = 0b001,
             AltFunc0 = 0b100
         ]
-    ],
-
-    GPCLR0 [
-        CLR2 OFFSET(2) NUMBITS(1) [
-            NoEffect = 0,
-            Clear = 1
-        ],
-
-        CLR1 OFFSET(1) NUMBITS(1) [
-            NoEffect = 0,
-            Clear = 1
-        ],
-
-        CLR0 OFFSET(0) NUMBITS(1) [
-            NoEffect = 0,
-            Clear = 1
-        ]
-    ],
-
-    GPLEV0 [
-        LEV3 OFFSET(3) NUMBITS(1) [],
-        LEV2 OFFSET(2) NUMBITS(1) [],
-        LEV1 OFFSET(1) NUMBITS(1) [],
-        LEV0 OFFSET(0) NUMBITS(1) []
     ]
 }
 
@@ -75,10 +51,10 @@ register_structs! {
         (0x1c => GPSET0: WriteOnly<u32>),
         (0x20 => GPSET1: WriteOnly<u32>),
         (0x24 => _reserved2),
-        (0x28 => GPCLR0: WriteOnly<u32, GPCLR0::Register>),
+        (0x28 => GPCLR0: WriteOnly<u32>),
         (0x2c => GPCLR1: WriteOnly<u32>),
         (0x30 => _reserved3),
-        (0x34 => GPLEV0: ReadOnly<u32, GPLEV0::Register>),
+        (0x34 => GPLEV0: ReadOnly<u32>),
         (0x38 => GPLEV1: ReadOnly<u32>),
         (0x3c => _reserved4),
         (0x94 => GPPUD: ReadWrite<u32>),
@@ -192,6 +168,10 @@ impl interface::gpio::Set for GPIO {
                 arch::spin_for_cycles(1);
             }
         };
+
+        if direction == Dir::Output {
+            inner.GPCLR0.set(1 << pin);
+        }
     }
 
     fn cleanup(&self) {
@@ -213,8 +193,7 @@ impl interface::gpio::Output for GPIO {
 impl interface::gpio::Input for GPIO {
     fn input(&self, _pin: u32) -> u32 {
         let inner = &self.inner.lock();
-        // (inner.GPLEV0.get() as u32 >> pin) & 1
-        inner.GPFSEL0.get()
+        (inner.GPLEV0.get() as u32 >> pin) & 1
     }
 }
 
