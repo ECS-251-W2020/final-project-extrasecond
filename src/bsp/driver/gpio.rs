@@ -168,10 +168,7 @@ impl interface::gpio::Set for GPIO {
                 arch::spin_for_cycles(1);
             }
         };
-
-        if direction == Dir::Output {
-            inner.GPCLR0.set(1 << pin);
-        }
+        inner.GPCLR0.set(1 << pin);
     }
 
     fn cleanup(&self) {
@@ -191,9 +188,9 @@ impl interface::gpio::Output for GPIO {
 }
 
 impl interface::gpio::Input for GPIO {
-    fn input(&self, _pin: u32) -> u32 {
+    fn input(&self, pin: u32) -> u32 {
         let inner = &self.inner.lock();
-        (inner.GPLEV0.get() as u32 >> pin) & 1
+        ((inner.GPLEV0.get() as u32) >> pin) & 1
     }
 }
 

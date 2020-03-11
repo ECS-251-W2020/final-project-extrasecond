@@ -33,10 +33,12 @@ unsafe fn kernel_init() -> ! {
 
 fn kernel_main() -> ! {
     use crate::interface::{
-        console::ConsoleAll,
-        gpio::{Dir, GPIOAll, Pud},
+        gpio::{Dir, Pud},
         time::Timer,
     };
+    use interface::gpio::All as GPIOAll;
+    use interface::console::All as ConsoleAll;
+    use interface::pwm::All as PWMAll;
     use core::time::Duration;
 
     info!("Booting on: {}", bsp::board_name());
@@ -70,6 +72,9 @@ fn kernel_main() -> ! {
     info!("{:032b}", bsp::gpio().input(0));
     bsp::gpio().setup(2, Dir::Input, Pud::PudOff);
     info!("{:032b}", bsp::gpio().input(0));
+
+    bsp::pwm().set_mode(1);
+
     let mut i = 0;
     loop {
         if i % 2 == 0 {

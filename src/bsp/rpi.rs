@@ -23,16 +23,23 @@ static mut GPIO: driver::GPIO = unsafe { driver::GPIO::new(memory_map::mmio::GPI
 static mut PL011_UART: driver::PL011Uart =
     unsafe { driver::PL011Uart::new(memory_map::mmio::PL011_UART_BASE) };
 
+static mut PWM: driver::PWM = 
+    unsafe { driver::PWM::new(memory_map::mmio::PWM_BASE, memory_map::mmio::CLOCK_BASE) };
+
 pub fn board_name() -> &'static str {
     "Raspberry Pi 3"
 }
 
-pub fn console() -> &'static mut impl interface::console::ConsoleAll {
+pub fn console() -> &'static mut impl interface::console::All {
     unsafe { &mut PL011_UART }
 }
 
-pub fn gpio() -> &'static mut impl interface::gpio::GPIOAll {
+pub fn gpio() -> &'static mut impl interface::gpio::All {
     unsafe { &mut GPIO }
+}
+
+pub fn pwm() -> &'static mut impl interface::pwm::All {
+    unsafe { &mut PWM }
 }
 
 pub unsafe fn panic_console_out() -> impl fmt::Write {

@@ -28,7 +28,24 @@ pub mod console {
         }
     }
 
-    pub trait ConsoleAll = Write + Read + Statistics;
+    pub trait All = Write + Read + Statistics;
+}
+
+pub mod pwm {
+    #[allow(dead_code)]
+    pub trait Set {
+        fn set_mode(&self, mode: u32);
+
+        fn set_range(&self, range: u32);
+
+        fn set_clock(&self, divisor: u32);
+    }
+
+    pub trait Output {
+        fn write(&self, pin: u32, value: u32);
+    }
+
+    pub trait All = Set + Output;
 }
 
 pub mod gpio {
@@ -60,7 +77,7 @@ pub mod gpio {
         fn input(&self, pin: u32) -> u32;
     }
 
-    pub trait GPIOAll = Set + Output + Input;
+    pub trait All = Set + Output + Input;
 }
 
 pub mod driver {
