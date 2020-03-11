@@ -14,7 +14,7 @@ pub unsafe extern "C" fn _start() -> ! {
         0b00 => el2_to_el1_transition(master_core_init as *const () as u64, bsp::BOOT_CORE_STACK_START),
 
         // Core 1-3: Slave core
-        0b01 | 0b10 | 0b11 => el2_to_el1_transition(other_cores_init as *const () as u64, (0b1011_00 | get_core_id()) << bsp::SLAVE_CORE_STACK_SHIFT),
+        0b01 | 0b10 | 0b11 => el2_to_el1_transition(other_cores_init as *const () as u64, (bsp::SLAVE_STACK_PREAMBLE | get_core_id()) << bsp::SLAVE_STACK_SHIFT),
 
         // Should not happen
         _ => wait_forever(get_core_id())
@@ -56,7 +56,7 @@ unsafe fn el2_to_el1_transition(next_func_addr: u64, stack_start_addr: u64) -> !
 }
 
 #[inline(always)]
-pub fn wait_forever(core_id: u64) -> ! {
+pub fn wait_forever(_core_id: u64) -> ! {
     loop {
         asm::wfe();
     }

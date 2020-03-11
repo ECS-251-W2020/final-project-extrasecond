@@ -67,10 +67,8 @@ fn kernel_main() -> ! {
         }
     }
 
-    // Wake up core 1.
-    if arch::get_core_id() == bsp::CORE_0_ID{
-        activate_other_cores();
-    }
+    // Wake up slave cores.
+    activate_other_cores();
 
     bsp::gpio().setup(17, Dir::Output, Pud::PudOff);
     //info!("0x{:08x}", bsp::gpio().input(0));
@@ -84,19 +82,22 @@ fn kernel_main() -> ! {
             bsp::gpio().output(17, 0);
         }
         info!("Spinning for 1 second");
-  
+        unsafe {asm!("sev");}
         arch::timer().spin_for(Duration::from_secs(1));
         i += 1;
     }
 }
 
+/// Nice and nite activation thanks to rust's zero-abstraction.
 fn activate_other_cores() {
-    use bsp::*;
-    SLAVE_CORES_WAKEUP_ADDR.iter().enumerate().for_each(|(i, &addr)| {
+    bsp::SLAVE_CORES_WAKEUP_ADDR.iter().enumerate().for_each(|(i, &addr)| {
         info!("Writing to 0x{:08x} to activate core {}...", addr, i);
         unsafe {
+            // Get the address to activate that core.
             let dest: *mut u64 = addr as *mut u64;
+            // Store _start function address as slave core entry point.
             *dest = arch::_start as *const () as u64;
+            // Activate!
             asm!("sev");
         }
     });
