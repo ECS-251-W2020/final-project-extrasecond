@@ -40,6 +40,13 @@ fn kernel_main() -> ! {
     };
     use core::time::Duration;
 
+    info!("Hit ENTER to continue...");
+    loop {
+        if bsp::console().read_char() == '\n' {
+            break;
+        }
+    }
+
     info!("Booting on: {}", bsp::board_name());
 
     info!("{}", bsp::virt_mem_layout());
@@ -59,14 +66,7 @@ fn kernel_main() -> ! {
     for (i, driver) in bsp::device_drivers().iter().enumerate() {
         info!("      {}. {}", i + 1, driver.compatible());
     }
-
-    info!("Hit ENTER to continue...");
-    loop {
-        if bsp::console().read_char() == '\n' {
-            break;
-        }
-    }
-
+    
     // Wake up slave cores.
     activate_other_cores();
 

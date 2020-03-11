@@ -1,7 +1,9 @@
 use crate::{arch, arch::Mutex, interface};
 use core::ops;
-use register::mmio::{ReadOnly, ReadWrite, WriteOnly};
-use register::{register_bitfields, register_structs};
+use register::{
+    mmio::{ReadOnly, ReadWrite, WriteOnly},
+    register_bitfields, register_structs,
+};
 
 register_bitfields! {
     u32,
@@ -35,6 +37,30 @@ register_bitfields! {
             Output = 0b001,
             AltFunc0 = 0b100
         ]
+    ],
+
+    GPCLR0 [
+        CLR2 OFFSET(2) NUMBITS(1) [
+            NoEffect = 0,
+            Clear = 1
+        ],
+
+        CLR1 OFFSET(1) NUMBITS(1) [
+            NoEffect = 0,
+            Clear = 1
+        ],
+
+        CLR0 OFFSET(0) NUMBITS(1) [
+            NoEffect = 0,
+            Clear = 1
+        ]
+    ],
+
+    GPLEV0 [
+        LEV3 OFFSET(3) NUMBITS(1) [],
+        LEV2 OFFSET(2) NUMBITS(1) [],
+        LEV1 OFFSET(1) NUMBITS(1) [],
+        LEV0 OFFSET(0) NUMBITS(1) []
     ]
 }
 
@@ -115,8 +141,7 @@ impl GPIO {
     }
 }
 
-use interface::gpio::Dir;
-use interface::gpio::Pud;
+use interface::gpio::{Dir, Pud};
 
 impl interface::gpio::Set for GPIO {
     fn pullupdn(&self, pin: u32, pud: Pud) {
@@ -151,22 +176,22 @@ impl interface::gpio::Set for GPIO {
                 inner.GPFSEL0.set(
                     (inner.GPFSEL0.get() & 0xFFFFFFF8_u32.rotate_left(pin * 3)) | (d << (pin * 3)),
                 );
-            }
+            },
             10..20 => {
                 inner.GPFSEL1.set(
                     (inner.GPFSEL1.get() & 0xFFFFFFF8_u32.rotate_left((pin - 10) * 3))
                         | (d << ((pin - 10) * 3)),
                 );
-            }
+            },
             20..28 => {
                 inner.GPFSEL2.set(
                     (inner.GPFSEL2.get() & 0xFFFFFFF8_u32.rotate_left((pin - 20) * 3))
                         | (d << ((pin - 20) * 3)),
                 );
-            }
+            },
             _ => {
                 arch::spin_for_cycles(1);
-            }
+            },
         };
 
         inner.GPCLR0.set(1 << pin);
