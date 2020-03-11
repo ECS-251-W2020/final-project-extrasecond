@@ -69,11 +69,11 @@ fn kernel_main() -> ! {
     }
 
     bsp::gpio().setup(17, Dir::Output, Pud::PudOff);
-    info!("{:032b}", bsp::gpio().input(0));
     bsp::gpio().setup(2, Dir::Input, Pud::PudOff);
     info!("{:032b}", bsp::gpio().input(0));
 
-    bsp::pwm().set_mode(1);
+    bsp::gpio().setup_pwm(12);
+    bsp::pwm().write(12, 100);
 
     let mut i = 0;
     loop {

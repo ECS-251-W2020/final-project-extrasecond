@@ -66,6 +66,8 @@ pub mod gpio {
 
         fn setup(&self, pin: u32, direction: Dir, pud: Pud);
 
+        fn setup_pwm(&self, pin: u32);
+
         fn cleanup(&self);
     }
 
