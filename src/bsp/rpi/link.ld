@@ -35,27 +35,27 @@ SECTIONS
         __bss_end = .;
     }
 
-    . = 0xD4000;
+    . = 0xD1000;
     .stack_core1 :
     {
         __stack_start__ = .;
-        . = . + 16384;
+        . = . + 4096;
         __stack_end__ = .;
     }
 
-    . = 0xD8000;
+    . = 0xD2000;
     .stack_core2 :
     {
         __stack_start__ = .;
-        . = . + 16384;
+        . = . + 4096;
         __stack_end__ = .;
     }
 
-    . = 0xDC000;
+    . = 0xD3000;
     .stack_core3 :
     {
         __stack_start__ = .;
-        . = . + 16384;
+        . = . + 4096;
         __stack_end__ = .;
     }
     . = ALIGN(65536); /* Fill up to 64 KiB */

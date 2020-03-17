@@ -18,17 +18,13 @@ unsafe fn zero_bss() {
     memory::zero_volatile(bss_range());
 }
 
-use crate::arch::{get_core_id, wait_forever};
-use crate::info;
 pub unsafe fn master_core_init() -> ! {
     zero_bss();
 
-    crate::kernel_init()
+    crate::kernel_main()
 }
 
+
 pub unsafe fn other_cores_init() -> ! {
-    loop {
-        info!("Core {} woke up: Hello world", get_core_id());
-        wait_forever(get_core_id())
-    }
+    crate::other_cores_main()
 }

@@ -17,7 +17,14 @@ mod panic;
 mod print;
 mod runtime_init;
 
-unsafe fn kernel_init() -> ! {
+use core::time::Duration;
+use crate::interface::{
+    console::ConsoleAll,
+    gpio::{Dir, GPIOAll, Pud},
+    time::Timer,
+};
+
+unsafe fn kernel_init() {
     use crate::interface::mm::MMU;
 
     if let Err(err_msg) = arch::mmu().init() {
@@ -29,16 +36,23 @@ unsafe fn kernel_init() -> ! {
         }
     }
     bsp::post_driver_init();
-    kernel_main()
+}
+
+unsafe fn other_cores_main() -> ! {
+    let id = crate::arch::get_core_id();
+    info!("Init slave core {}...", id);
+    kernel_init();
+
+    info!("Core {} init finished, starting to receive jobs...", id);
+    loop {
+        info!("Jobs done. sleep for 500 mill seconds...");
+        arch::timer().spin_for(Duration::from_millis(500));
+    }
 }
 
 fn kernel_main() -> ! {
-    use crate::interface::{
-        console::ConsoleAll,
-        gpio::{Dir, GPIOAll, Pud},
-        time::Timer,
-    };
-    use core::time::Duration;
+    info!("Init kernel...");
+    unsafe { kernel_init(); }
 
     info!("Hit ENTER to continue...");
     loop {
