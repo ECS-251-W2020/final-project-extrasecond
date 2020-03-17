@@ -17,6 +17,7 @@ mod panic;
 mod print;
 mod runtime_init;
 
+use arch::init_mmu;
 use core::time::Duration;
 use interface::{
     console::All as ConsoleAll,
@@ -25,10 +26,8 @@ use interface::{
     pwm::All as PWMAll,
     time::Timer,
 };
-use arch::init_mmu;
 
 unsafe fn kernel_init() {
-
     init_mmu();
     for i in bsp::device_drivers().iter_mut() {
         if let Err(()) = i.init() {
