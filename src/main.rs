@@ -17,14 +17,14 @@ mod panic;
 mod print;
 mod runtime_init;
 
-use core::time::Duration;
 use crate::interface::{
-    gpio::{Dir, Pud},
-    time::Timer,
     console::All as ConsoleAll,
     gpio::All as GPIOAll,
+    gpio::{Dir, Pud},
     pwm::All as PWMAll,
+    time::Timer,
 };
+use core::time::Duration;
 
 unsafe fn kernel_init() {
     use crate::interface::mm::MMU;
@@ -54,7 +54,9 @@ unsafe fn other_cores_main() -> ! {
 
 fn kernel_main() -> ! {
     info!("Init kernel...");
-    unsafe { kernel_init(); }
+    unsafe {
+        kernel_init();
+    }
 
     info!("Hit ENTER to continue...");
     loop {

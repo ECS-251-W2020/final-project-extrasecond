@@ -24,7 +24,6 @@ pub unsafe fn master_core_init() -> ! {
     crate::kernel_main()
 }
 
-
 pub unsafe fn other_cores_init() -> ! {
     crate::other_cores_main()
 }
