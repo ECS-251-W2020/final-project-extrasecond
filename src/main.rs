@@ -42,7 +42,6 @@ unsafe fn kernel_init() {
 
 unsafe fn other_cores_main() -> ! {
     let id = crate::arch::get_core_id();
-    info!("Init slave core {}...", id);
     kernel_init();
 
     info!("Core {} init finished, starting to receive jobs...", id);
