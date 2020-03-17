@@ -6,9 +6,32 @@ mod time;
 use crate::{bsp, interface};
 use cortex_a::{asm, regs::*};
 
+
+/// Nice and nite activation thanks to rust's zero-abstraction.
+fn activate_other_cores() {
+    bsp::SLAVE_CORES_WAKEUP_ADDR
+        .iter()
+        .for_each(|&addr| {
+            unsafe {
+                // Get the address to activate that core.
+                let dest: *mut u64 = addr as *mut u64;
+                // Store _start function address as slave core entry point.
+                *dest = _start as *const () as u64;
+            }
+        });
+    // Activate all cores at once!
+    unsafe {
+        asm!("sev");
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn _start() -> ! {
     use crate::runtime_init::{master_core_init, other_cores_init};
+
+    // Activation has to be done in EL2. Do this while we are still this privilaged.
+    activate_other_cores();
+
     let id = get_core_id();
     match id {
         // Core 0: Master core
@@ -123,7 +146,12 @@ pub mod state {
 }
 
 static MMU: mmu::MMU = mmu::MMU;
+pub unsafe fn init_mmu() {
+    use crate::interface::mm::MMU;
 
-pub fn mmu() -> &'static impl interface::mm::MMU {
-    &MMU
+    if let Err(err_msg) = MMU.init() {
+        panic!("MMU: {}", err_msg);
+    }
 }
+
+
