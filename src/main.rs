@@ -17,7 +17,7 @@ mod panic;
 mod print;
 mod runtime_init;
 
-use crate::interface::{
+use interface::{
     console::All as ConsoleAll,
     gpio::All as GPIOAll,
     gpio::{Dir, Pud},
@@ -53,7 +53,6 @@ unsafe fn other_cores_main() -> ! {
 }
 
 fn kernel_main() -> ! {
-    info!("Init kernel...");
     unsafe {
         kernel_init();
     }

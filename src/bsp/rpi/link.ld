@@ -21,6 +21,30 @@ SECTIONS
     . = ALIGN(65536); /* Fill up to 64 KiB */
     __ro_end = .;
 
+    . = 0x91000;
+    .stack_core1 :
+    {
+        __stack_start__ = .;
+        . = . + 4096;
+        __stack_end__ = .;
+    }
+
+    . = 0x92000;
+    .stack_core2 :
+    {
+        __stack_start__ = .;
+        . = . + 4096;
+        __stack_end__ = .;
+    }
+
+    . = 0x93000;
+    .stack_core3 :
+    {
+        __stack_start__ = .;
+        . = . + 4096;
+        __stack_end__ = .;
+    }
+
     .data :
     {
         *(.data*)
@@ -34,31 +58,6 @@ SECTIONS
         . = ALIGN(8);
         __bss_end = .;
     }
-
-    . = 0xD1000;
-    .stack_core1 :
-    {
-        __stack_start__ = .;
-        . = . + 4096;
-        __stack_end__ = .;
-    }
-
-    . = 0xD2000;
-    .stack_core2 :
-    {
-        __stack_start__ = .;
-        . = . + 4096;
-        __stack_end__ = .;
-    }
-
-    . = 0xD3000;
-    .stack_core3 :
-    {
-        __stack_start__ = .;
-        . = . + 4096;
-        __stack_end__ = .;
-    }
-    . = ALIGN(65536); /* Fill up to 64 KiB */
 
     /DISCARD/ : { *(.comment*) }
 }
