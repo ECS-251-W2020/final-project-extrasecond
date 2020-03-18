@@ -5,21 +5,18 @@ mod time;
 
 use crate::{bsp, interface};
 use cortex_a::{asm, regs::*};
+pub use time::sleep;
 
 /// Nice and nite activation thanks to rust's zero-abstraction.
-fn activate_other_cores() {
+unsafe fn activate_other_cores() {
     bsp::SLAVE_CORES_WAKEUP_ADDR.iter().for_each(|&addr| {
-        unsafe {
-            // Get the address to activate that core.
-            let dest: *mut u64 = addr as *mut u64;
-            // Store _start function address as slave core entry point.
-            *dest = _start as *const () as u64;
-        }
+        // Get the address to activate that core.
+        let dest: *mut u64 = addr as *mut u64;
+        // Store _start function address as slave core entry point.
+        *dest = _start as *const () as u64;
     });
     // Activate all cores at once!
-    unsafe {
-        asm!("sev");
-    }
+    asm!("sev");
 }
 
 #[no_mangle]

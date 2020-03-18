@@ -16,15 +16,15 @@ mod memory;
 mod panic;
 mod print;
 mod runtime_init;
+mod multi_core;
 
-use arch::init_mmu;
+use arch::{init_mmu, sleep};
 use core::time::Duration;
 use interface::{
     console::All as ConsoleAll,
     gpio::All as GPIOAll,
     gpio::{Dir, Pud},
     pwm::All as PWMAll,
-    time::Timer,
 };
 
 unsafe fn kernel_init() {
@@ -35,17 +35,6 @@ unsafe fn kernel_init() {
         }
     }
     bsp::post_driver_init();
-}
-
-unsafe fn other_cores_main() -> ! {
-    let id = crate::arch::get_core_id();
-    init_mmu();
-
-    info!("Core {} init finished, starting to receive jobs...", id);
-    loop {
-        info!("Core {}: Jobs done. sleep for 500 mill seconds...", id);
-        arch::timer().spin_for(Duration::from_millis(500));
-    }
 }
 
 fn kernel_main() -> ! {
@@ -87,6 +76,8 @@ fn kernel_main() -> ! {
     bsp::gpio().setup_pwm(12);
     bsp::pwm().write(12, 100);
 
+    // crate::multi_core::submit_job_override(hello_world, 1);
+
     let mut i = 0;
     loop {
         if i % 2 == 0 {
@@ -95,7 +86,16 @@ fn kernel_main() -> ! {
             bsp::gpio().output(17, 0);
         }
         info!("Spinning for 1 second");
-        arch::timer().spin_for(Duration::from_secs(1));
+        sleep(Duration::from_secs(1));
         i += 1;
+    }
+}
+
+#[allow(dead_code)]
+fn hello_world() {
+    info!("From core {}: Saying Hello World for 10 times.", crate::arch::get_core_id());
+    for i in 0..10 {
+        info!("{} th Hello world", i);
+        sleep(Duration::from_millis(500));
     }
 }
