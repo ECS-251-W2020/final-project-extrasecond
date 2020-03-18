@@ -1,9 +1,14 @@
-use crate::info;
 use crate::arch::{self, init_mmu, sleep, Mutex};
-use core::time::Duration;
+use crate::info;
 use core::result::Result;
+use core::time::Duration;
 
-static JOB_PTRS: [Mutex<Option<fn()>>; 4] = [Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None)];
+static JOB_PTRS: [Mutex<Option<fn()>>; 4] = [
+    Mutex::new(None),
+    Mutex::new(None),
+    Mutex::new(None),
+    Mutex::new(None),
+];
 
 pub unsafe fn other_cores_main() -> ! {
     let id = arch::get_core_id() as usize;
@@ -26,7 +31,7 @@ pub unsafe fn other_cores_main() -> ! {
 }
 
 #[allow(dead_code)]
-pub fn submit_job(func: fn(), id: u64) -> Result<(), &'static str>  {
+pub fn submit_job(func: fn(), id: u64) -> Result<(), &'static str> {
     let id = id as usize;
     let mut addr_lock = JOB_PTRS[id].lock();
     if addr_lock.is_some() {
@@ -38,9 +43,9 @@ pub fn submit_job(func: fn(), id: u64) -> Result<(), &'static str>  {
 }
 
 #[allow(dead_code)]
-pub fn submit_job_on_busy(func: fn(), id: u64)  {
+pub fn submit_job_on_busy(func: fn(), id: u64) {
     let id = id as usize;
-    loop{
+    loop {
         let mut addr_lock = JOB_PTRS[id].lock();
         if addr_lock.is_some() {
             sleep(Duration::from_millis(100));
@@ -52,7 +57,7 @@ pub fn submit_job_on_busy(func: fn(), id: u64)  {
 }
 
 #[allow(dead_code)]
-pub fn submit_job_override(func: fn(), id: u64) -> bool  {
+pub fn submit_job_override(func: fn(), id: u64) -> bool {
     let id = id as usize;
     let mut addr_lock = JOB_PTRS[id].lock();
     let ret = addr_lock.is_some();

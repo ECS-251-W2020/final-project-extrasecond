@@ -13,10 +13,10 @@ mod arch;
 mod bsp;
 mod interface;
 mod memory;
+mod multi_core;
 mod panic;
 mod print;
 mod runtime_init;
-mod multi_core;
 
 use arch::{init_mmu, sleep};
 use core::time::Duration;
@@ -93,7 +93,10 @@ fn kernel_main() -> ! {
 
 #[allow(dead_code)]
 fn hello_world() {
-    info!("From core {}: Saying Hello World for 10 times.", crate::arch::get_core_id());
+    info!(
+        "From core {}: Saying Hello World for 10 times.",
+        crate::arch::get_core_id()
+    );
     for i in 0..10 {
         info!("{} th Hello world", i);
         sleep(Duration::from_millis(500));
