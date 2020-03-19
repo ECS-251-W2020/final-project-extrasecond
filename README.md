@@ -39,6 +39,12 @@ init_uart_clock=48000000
 ```bash
 sudo screen /dev/ttyUSB0 230400
 ```
-## TODO
+## Chainboot ##
 
-`make` before `demo_payload_rpi3.img` become useful. Then you can `make chainboot`
+`make` before `demo_payload_rpi3.img` become useful. Then you can `make chainboot`. Need ruby runtime environment and `colorize`, `ruby-progressbar`, `serialport` gem packages.
+
+## GPIO and PWM driver ##
+
+1. Use `gpio().setup(pin, direction, pull)` to set up GPIO pins and clear the output bit respectively.
+
+2. Write or read the status of GPIO pins by using `gpio().output(pin, value)` and `gpio().input(pin)`

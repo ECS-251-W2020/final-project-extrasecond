@@ -69,9 +69,8 @@ fn kernel_main() -> ! {
         info!("      {}. {}", i + 1, driver.compatible());
     }
 
-    bsp::gpio().setup(17, Dir::Output, Pud::PudOff);
+    bsp::gpio().setup(1, Dir::Output, Pud::PudOff);
     bsp::gpio().setup(2, Dir::Input, Pud::PudOff);
-    info!("{:032b}", bsp::gpio().input(0));
 
     bsp::gpio().setup_pwm(12);
     bsp::pwm().write(12, 100);
@@ -88,6 +87,32 @@ fn kernel_main() -> ! {
         info!("Spinning for 1 second");
         sleep(Duration::from_secs(1));
         i += 1;
+        if i == 10 {
+            break;
+        }
+    }
+
+    let mut i = 0;
+    loop {
+        info!(Echoing input)
+        let c = bsp::console().read_char();
+        bsp::console().write_char(c);
+        i += 1;
+        if i == 10 {
+            break;
+        }
+    }
+
+    let mut i = 0;
+    loop {
+        if i % 2 == 0{
+            bsp::pwm().write(12, i * 64);
+        } else {
+            bsp::pwm().write(12, 1024 - i * 64);
+        }
+        if i == 16 {
+            break;
+        }
     }
 }
 
