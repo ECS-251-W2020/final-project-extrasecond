@@ -125,5 +125,6 @@ fn hello_world() {
     for i in 0..10 {
         info!("{} th Hello world", i);
         sleep(Duration::from_millis(500));
+		
     }
 }
