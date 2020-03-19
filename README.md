@@ -1,10 +1,12 @@
 # RITOS
 
+
 For proposal please refer to [here](https://github.com/ExtraSecond/proposal).
 For weekly meeting notes please refer to [notes](https://github.com/ExtraSecond/weekly-meeting).
 
 
 ## Install suitable rust toolchain ##
+
 
 ```bash
 curl https://sh.rustup.rs -sSf             \

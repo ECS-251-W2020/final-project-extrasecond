@@ -4,6 +4,8 @@
 #
 # Copyright (c) 2018-2020 Andre Richter <andre.o.richter@gmail.com>
 
+
+
 DIFF=$(
     diff -uNr \
 	 -x README.md \

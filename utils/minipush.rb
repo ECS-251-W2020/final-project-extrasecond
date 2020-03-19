@@ -5,6 +5,8 @@
 #
 # Copyright (c) 2020 Andre Richter <andre.o.richter@gmail.com>
 
+
+
 require 'rubygems'
 require 'bundler/setup'
 require 'io/console'
